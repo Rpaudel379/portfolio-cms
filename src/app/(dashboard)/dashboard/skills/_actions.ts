@@ -1,7 +1,7 @@
 "use server";
 
-import { idSchema } from "@/dto/common.schema";
-import { SkillSchema, skillSchema, skillSchemaDTO } from "@/dto/skill.schema";
+import { idSchema } from "@/schema/common.schema";
+import { skillSchema, skillSchemaDTO } from "@/schema/skill.schema";
 import { prisma } from "@/lib/prisma";
 import { ServerActionState } from "@/types/common.types";
 import { SaveSkill } from "@/types/skill.types";
@@ -15,32 +15,29 @@ export const saveSkill = async (
   data: SaveSkill
 ): Promise<ServerActionState<null>> => {
   try {
-    // new skill
-    if (typeof data === "string") {
+    const isNew: boolean = typeof data === "string";
+
+    if (isNew) {
       const name = skillSchema.parse(data);
 
-      const saveSkill = await prisma.skill.create({
+      await prisma.skill.create({
         data: { name },
       });
-
-      console.log(saveSkill);
     } else {
       const { id, name } = skillSchemaDTO.parse(data);
 
-      const updateSkill = await prisma.skill.update({
+      await prisma.skill.update({
         where: { id: id },
         data: {
           name,
         },
       });
-
-      console.log(updateSkill);
     }
 
     revalidatePath("/dashboard/skills");
     return {
       status: "success",
-      message: `Skill ${typeof data === "string" ? "Created" : "Updated"}`,
+      message: `Skill ${isNew ? "Created" : "Updated"}`,
       data: null,
       errors: null,
     };
@@ -57,14 +54,7 @@ export const saveSkill = async (
     console.dir(error, { depth: null });
 
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
-      console.dir(error, { depth: null });
-      if (error.code === "P2002") {
-        messageResponse = "Skill already exists";
-      } else if (error.code === "P2023") {
-        messageResponse = "The skill id is not correct";
-      } else {
-        messageResponse = "Database validation failed";
-      }
+      messageResponse = handlePrismaErrors(error);
     }
 
     return {

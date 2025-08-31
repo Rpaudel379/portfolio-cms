@@ -29,3 +29,52 @@ model Contact {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+enum WorkType {
+  EDUCATION
+  WORK
+  PROJECT
+  ACHIEVEMENT
+  FREELANCE
+}
+
+model Timeline {
+  id          String   @id @default(uuid()) @db.Uuid
+  year        String
+  title       String
+  company     String?
+  description String
+  work_type   WorkType @default(WORK)
+  skills      String?  @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum ProjectStatus {
+  LIVE
+  DEVELOPMENT
+  INPROGRESS
+  MAINTENANCE
+  ARCHIVED
+}
+
+model Project {
+  id           String        @id @default(uuid()) @db.Uuid
+  title        String
+  description  String
+  tags         String[]
+  category     String
+  status       ProjectStatus @default(INPROGRESS)
+  year         String?
+  github       String?
+  demo         String?
+  features     String[]
+  challenges   String?
+  technologies Json?         @db.JsonB
+  thumbnail    String?
+  imageId      String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

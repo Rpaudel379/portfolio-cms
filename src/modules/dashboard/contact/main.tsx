@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ContactSchema } from "@/schema/contact.schema";
+import { ContactSchema, ContactSchemaDTO } from "@/schema/contact.schema";
 import { useConfirmModal } from "@/hooks/use-confirm";
 import { useCustomAction } from "@/hooks/use-custom-action";
 import { ServerActionState } from "@/types/common.types";
@@ -26,7 +26,9 @@ import { toast } from "sonner";
 
 type Props = {
   contactInfo: Contact | null;
-  updateContactInfo: (data: ContactSchema) => Promise<ServerActionState<null>>;
+  updateContactInfo: (
+    data: ContactSchemaDTO
+  ) => Promise<ServerActionState<null>>;
 };
 
 const ContactPageClient = ({ contactInfo, updateContactInfo }: Props) => {

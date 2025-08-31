@@ -18,14 +18,13 @@ export const updateContactInfo = async (
   try {
     const contactInfo = contactSchemaDTO.parse(data);
 
-    const saveContactInfo = await prisma.contact.update({
+    await prisma.contact.update({
       where: { id: contactInfo.id },
       data: contactInfo,
     });
 
-    console.log(saveContactInfo);
-
     revalidatePath("/dashboard/contact");
+    revalidatePath("/contact");
     return {
       status: "success",
       message: "Contact Info updated",

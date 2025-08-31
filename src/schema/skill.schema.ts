@@ -1,4 +1,4 @@
-import { idSchema } from "@/dto/common.schema";
+import { idSchema } from "@/schema/common.schema";
 import { z } from "zod";
 
 export const skillSchema = z

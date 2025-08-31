@@ -6,6 +6,7 @@ import {
   IconSettings,
   IconTimeline,
   IconUser,
+  IconDatabase,
 } from "@tabler/icons-react";
 
 export const dashboardItems = [
@@ -37,6 +38,11 @@ export const contentItems = [
     url: "/dashboard/contact",
     icon: IconMail,
   },
+  {
+    title: "Storage",
+    url: "/dashboard/storage",
+    icon: IconDatabase,
+  },
 ];
 
 export const settingsItems = [
@@ -51,3 +57,11 @@ export const settingsItems = [
     icon: IconSettings,
   },
 ];
+
+export const typeIcons = {
+  EDUCATION: "🎓", // Graduation cap
+  WORK: "💼", // Briefcase
+  PROJECT: "🚀",
+  ACHIEVEMENT: "🏆", // Trophy
+  FREELANCE: "🖥️", // Laptop (symbolizing remote work)
+};

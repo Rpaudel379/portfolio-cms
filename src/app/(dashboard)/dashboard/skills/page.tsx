@@ -2,7 +2,7 @@ import {
   saveSkill,
   deleteSkill,
 } from "@/app/(dashboard)/dashboard/skills/_actions";
-import SkillsPageClient from "@/components/dashboard/skills/main";
+import SkillsPageClient from "@/modules/dashboard/skills/main";
 import { prisma } from "@/lib/prisma";
 import React from "react";
 

@@ -1,5 +1,6 @@
 import { categories, projects, sortOptions } from "@/const";
 import ProjectPageClient from "@/modules/projects/components/main";
+import { Suspense } from "react";
 
 const ProjectPage = () => {
   return (
@@ -21,11 +22,13 @@ const ProjectPage = () => {
 
         {/* client component */}
 
-        <ProjectPageClient
-          projects={projects}
-          categories={categories}
-          sortOptions={sortOptions}
-        />
+        <Suspense>
+          <ProjectPageClient
+            projects={projects}
+            categories={categories}
+            sortOptions={sortOptions}
+          />
+        </Suspense>
       </div>
     </div>
   );

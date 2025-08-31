@@ -84,7 +84,7 @@ const ProjectPageClient = ({ projects, categories, sortOptions }: Props) => {
         (project) => project.category === selectedCategory
       );
     }
-
+    alert("refine filter case - createdAt");
     // Sort projects
     const sorted = [...filtered].sort((a, b) => {
       switch (selectedSort) {

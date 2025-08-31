@@ -16,7 +16,6 @@ export const useCustomAction = <TInput, TResult>(
 
   const execute = async (data: TInput) => {
     setIsLoading(true);
-
     try {
       const res = await action(data);
       if (res.status === "success") {
@@ -29,6 +28,10 @@ export const useCustomAction = <TInput, TResult>(
         }
       }
     } catch (error: any) {
+      if (options?.onError) {
+        options?.onError("Something went wrong");
+      }
+      console.log(error);
     } finally {
       setIsLoading(false);
     }

@@ -70,7 +70,7 @@ const SkillsPageClient = ({ skills, saveSkill, deleteSkill }: Props) => {
               placeholder="Enter skill name (e.g., React, Node.js)"
               value={newSkill}
               onChange={(e) => setNewSkill(e.target.value)}
-              onKeyPress={(e) => e.key === "Enter" && save(newSkill)}
+              onKeyDown={(e) => e.key === "Enter" && save(newSkill)}
               disabled={isCreating}
             />
             <Button onClick={() => save(newSkill)} disabled={isCreating}>
@@ -145,7 +145,7 @@ const SkillsPageClient = ({ skills, saveSkill, deleteSkill }: Props) => {
                         onClick={() =>
                           confirmAction(
                             () => removeSkill(skill.id),
-                            "Are you sure?"
+                            "Are you sure you want to delete?"
                           )
                         }
                       >

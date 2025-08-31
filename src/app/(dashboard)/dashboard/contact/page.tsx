@@ -1,6 +1,6 @@
 import { updateContactInfo } from "@/app/(dashboard)/dashboard/contact/_actions";
 import { prisma } from "@/lib/prisma";
-import ContactPageClient from "@/modules/contact/dashboard/main";
+import ContactPageClient from "@/modules/dashboard/contact/main";
 import React from "react";
 
 const ContactPage = async () => {

@@ -1,4 +1,5 @@
 "use client";
+import { typeIcons } from "@/app/(dashboard)/_const";
 import LimitedBadge from "@/components/limited-badge";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -26,12 +27,6 @@ export const Timeline = ({ items }: TimelineProps) => {
   const heightTransform = useTransform(scrollYProgress, [0, 1], [0, height]);
   const opacityTransform = useTransform(scrollYProgress, [0, 0.1], [0, 1]);
 
-  const typeIcons = {
-    education: "🎓",
-    work: "💼",
-    project: "🚀",
-    achievement: "🏆",
-  };
   return (
     <div className="w-full bg-background/40 font-sans" ref={containerRef}>
       <div
