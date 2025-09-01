@@ -10,7 +10,6 @@ import {
 } from "@/app/(dashboard)/dashboard/timeline/_actions";
 import { ServerActionState } from "@/types/common.types";
 import { TimelineSchemaDTO } from "@/schema/timeline.schema";
-import Timelines from "@/modules/dashboard/timeline/timelines";
 import { TimelineForm } from "@/modules/dashboard/timeline/timeline-form";
 import { TimelinesDnd } from "@/modules/dashboard/timeline/dnd/timelines-dnd";
 import { TimelineItem } from "@/modules/dashboard/timeline/dnd/timeline-item";
