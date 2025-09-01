@@ -6,23 +6,33 @@ import { ProjectDrawer } from "@/modules/projects/components/project-drawer";
 import ProjectGrid from "@/modules/projects/components/project-grid";
 import ResultsInfo from "@/modules/projects/components/results-info";
 import SearchBar from "@/modules/projects/components/search";
+import { ProjectCategoryEnum, ProjectSchemaDTO } from "@/schema/project.schema";
 import { useRouter, useSearchParams } from "next/navigation";
-import React, { useEffect, useLayoutEffect, useMemo, useState } from "react";
+import React, {
+  Dispatch,
+  SetStateAction,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useState,
+} from "react";
 
 type Props = {
-  projects: typeof projects;
-  categories: string[];
-  sortOptions: string[];
+  projects: ProjectSchemaDTO[];
 };
 
-const ProjectPageClient = ({ projects, categories, sortOptions }: Props) => {
-  const [selectedProject, setSelectedProject] = useState<
-    (typeof projects)[0] | null
-  >(null);
+const ProjectPageClient = ({ projects }: Props) => {
+  const [selectedProject, setSelectedProject] =
+    useState<ProjectSchemaDTO | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("All");
-  const [selectedSort, setSelectedSort] = useState("Latest");
+
+  const [filterCategory, setFilterCategory] = useState<
+    ProjectCategoryEnum | "all"
+  >("all");
+
+  const [sortBy, setSortBy] = useState<"newest" | "oldest" | "title">("newest");
+
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -30,7 +40,7 @@ const ProjectPageClient = ({ projects, categories, sortOptions }: Props) => {
   useLayoutEffect(() => {
     const projectId = searchParams.get("project");
     if (projectId) {
-      const project = projects.find((p) => p.id === Number.parseInt(projectId));
+      const project = projects.find((p) => p.id === projectId);
       if (project) {
         setSelectedProject(project);
         setIsDrawerOpen(true);
@@ -71,7 +81,6 @@ const ProjectPageClient = ({ projects, categories, sortOptions }: Props) => {
         (project) =>
           project.title.toLowerCase().includes(query) ||
           project.description.toLowerCase().includes(query) ||
-          project.longDescription?.toLowerCase().includes(query) ||
           project.tags.some((tag) => tag.toLowerCase().includes(query)) ||
           project.category.toLowerCase().includes(query) ||
           project.status.toLowerCase().includes(query)
@@ -79,56 +88,62 @@ const ProjectPageClient = ({ projects, categories, sortOptions }: Props) => {
     }
 
     // Filter by category
-    if (selectedCategory !== "All") {
+    if (filterCategory !== "all") {
       filtered = filtered.filter(
-        (project) => project.category === selectedCategory
+        (project) => project.category === filterCategory
       );
     }
-    alert("refine filter case - createdAt");
+
     // Sort projects
     const sorted = [...filtered].sort((a, b) => {
-      switch (selectedSort) {
-        case "Latest":
-          return Number.parseInt(b.year) - Number.parseInt(a.year);
-        case "Popular":
-          return (b.stats?.rating || 0) - (a.stats?.rating || 0);
-        case "A-Z":
+      switch (sortBy) {
+        case "newest":
+          return (
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          );
+        case "oldest":
+          return (
+            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+          );
+        case "title":
           return a.title.localeCompare(b.title);
-        case "Rating":
-          return (b.stats?.rating || 0) - (a.stats?.rating || 0);
         default:
           return 0;
       }
     });
 
     return sorted;
-  }, [searchQuery, selectedCategory, selectedSort]);
+  }, [searchQuery, filterCategory, sortBy]);
 
   return (
     <div>
       <div className="flex flex-col gap-6 mb-12 p-6 bg-card/70 rounded-2xl border">
         <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
         <FilterSort
-          categories={categories}
-          selectedCategory={selectedCategory}
-          setSelectedCategory={setSelectedCategory}
-          selectedSort={selectedSort}
-          setSelectedSort={setSelectedSort}
-          sortOptions={sortOptions}
+          filterCategory={filterCategory}
+          setFilterCategory={
+            setFilterCategory as Dispatch<SetStateAction<string>>
+          }
+          sortBy={sortBy}
+          setSortBy={setSortBy as Dispatch<SetStateAction<string>>}
         />
       </div>
       <ResultsInfo
         filteredAndSortedProjects={filteredAndSortedProjects}
         searchQuery={searchQuery}
-        selectedCategory={selectedCategory}
+        filterCategory={filterCategory}
         setSearchQuery={setSearchQuery}
-        setSelectedCategory={setSelectedCategory}
+        setFilterCategory={
+          setFilterCategory as Dispatch<SetStateAction<string>>
+        }
       />
 
       <ProjectGrid
         filteredAndSortedProjects={filteredAndSortedProjects}
         setSearchQuery={setSearchQuery}
-        setSelectedCategory={setSelectedCategory}
+        setFilterCategory={
+          setFilterCategory as Dispatch<SetStateAction<string>>
+        }
         handleProjectSelect={handleProjectSelect}
       />
 

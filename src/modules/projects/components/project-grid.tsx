@@ -1,20 +1,21 @@
 import { Button } from "@/components/ui/button";
 import { projects } from "@/const";
 import { ProjectCard } from "@/modules/projects/components/project-card";
+import { ProjectSchemaDTO } from "@/schema/project.schema";
 import { Search } from "lucide-react";
 import React from "react";
 
 type Props = {
-  filteredAndSortedProjects: typeof projects;
+  filteredAndSortedProjects: ProjectSchemaDTO[];
   setSearchQuery: (value: React.SetStateAction<string>) => void;
-  setSelectedCategory: (value: React.SetStateAction<string>) => void;
-  handleProjectSelect: (project: (typeof projects)[0]) => void;
+  setFilterCategory: (value: React.SetStateAction<string>) => void;
+  handleProjectSelect: (project: ProjectSchemaDTO) => void;
 };
 
 const ProjectGrid = ({
   filteredAndSortedProjects,
   setSearchQuery,
-  setSelectedCategory,
+  setFilterCategory,
   handleProjectSelect,
 }: Props) => {
   return (
@@ -41,7 +42,7 @@ const ProjectGrid = ({
             variant="outline"
             onClick={() => {
               setSearchQuery("");
-              setSelectedCategory("All");
+              setFilterCategory("All");
             }}
           >
             Clear all filters

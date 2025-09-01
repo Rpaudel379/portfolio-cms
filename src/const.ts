@@ -1,3 +1,8 @@
+import {
+  ProjectCategoryEnum,
+  ProjectStatusEnum,
+} from "@/schema/project.schema";
+
 export const projects = [
   {
     id: 1,
@@ -235,11 +240,20 @@ export const projects = [
   },
 ];
 
-export const categories = [
-  "All",
-  "Full-Stack",
-  "Backend",
-  "Frontend",
-  "DevOps",
+export const projectStatusEnums: ProjectStatusEnum[] = [
+  "LIVE",
+  "INPROGRESS",
+  "ARCHIVED",
+  "DEVELOPMENT",
+  "MAINTENANCE",
 ];
-export const sortOptions = ["Latest", "Popular", "A-Z", "Rating"];
+
+export const projectCategoryEnums: ProjectCategoryEnum[] = [
+  "Full-Stack",
+  "Frontend",
+  "Backend",
+  "DevOps",
+  "AI/ML",
+];
+
+export const sortOptions = ["newest", "oldest", "title"] as const;

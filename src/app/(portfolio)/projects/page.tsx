@@ -1,8 +1,15 @@
-import { categories, projects, sortOptions } from "@/const";
+import { prisma } from "@/lib/prisma";
 import ProjectPageClient from "@/modules/projects/components/main";
+import { ProjectSchemaDTO } from "@/schema/project.schema";
 import { Suspense } from "react";
 
-const ProjectPage = () => {
+const ProjectPage = async () => {
+  const getAllProjects = async () => {
+    return await prisma.project.findMany({ orderBy: { createdAt: "asc" } });
+  };
+
+  const projects = await getAllProjects();
+
   return (
     <div className="container mx-auto px-4 py-12">
       <div className="max-w-7xl mx-auto">
@@ -23,11 +30,7 @@ const ProjectPage = () => {
         {/* client component */}
 
         <Suspense>
-          <ProjectPageClient
-            projects={projects}
-            categories={categories}
-            sortOptions={sortOptions}
-          />
+          <ProjectPageClient projects={projects as ProjectSchemaDTO[]} />
         </Suspense>
       </div>
     </div>

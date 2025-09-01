@@ -30,32 +30,10 @@ import { useIsMobile } from "@/hooks/use-mobile";
 
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { cn } from "@/lib/utils";
-
-interface Project {
-  id: number;
-  title: string;
-  description: string;
-  longDescription?: string;
-  thumbnail: string;
-  tags: string[];
-  category: string;
-  status: string;
-  year: string;
-  github?: string;
-  demo?: string;
-  featured?: boolean;
-  stats?: {
-    users: string;
-    performance: string;
-    rating: number;
-  };
-  features?: string[];
-  challenges?: string;
-  technologies?: Record<string, string[]>;
-}
+import { ProjectSchemaDTO } from "@/schema/project.schema";
 
 interface ProjectDrawerProps {
-  project: Project | null;
+  project: ProjectSchemaDTO | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
@@ -95,11 +73,6 @@ export function ProjectDrawer({
                     <div className="w-2 h-2 bg-green-500 rounded-full mr-1 animate-pulse" />
                     {project.status}
                   </Badge>
-                  {project.featured && (
-                    <Badge className="text-xs bg-gradient-to-r from-yellow-500 to-orange-500 text-white">
-                      Featured
-                    </Badge>
-                  )}
                 </div>
               </div>
               <DrawerClose asChild>
@@ -141,17 +114,15 @@ export function ProjectDrawer({
                 <span className="text-muted-foreground">{project.year}</span>
               </div>
 
-              {project.longDescription && (
-                <div>
-                  <h4 className="font-semibold mb-2 flex items-center gap-2">
-                    <Code className="w-4 h-4 text-primary" />
-                    About This Project
-                  </h4>
-                  <p className="text-muted-foreground leading-relaxed">
-                    {project.longDescription}
-                  </p>
-                </div>
-              )}
+              <div>
+                <h4 className="font-semibold mb-2 flex items-center gap-2">
+                  <Code className="w-4 h-4 text-primary" />
+                  About This Project
+                </h4>
+                <p className="text-muted-foreground leading-relaxed">
+                  {project.description}
+                </p>
+              </div>
             </div>
 
             {/* Features */}

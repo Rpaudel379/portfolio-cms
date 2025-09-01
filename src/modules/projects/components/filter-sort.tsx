@@ -6,25 +6,22 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { projectCategoryEnums } from "@/const";
 import { Filter } from "lucide-react";
 import React from "react";
 
 type Props = {
-  categories: string[];
-  selectedCategory: string;
-  setSelectedCategory: (value: React.SetStateAction<string>) => void;
-  selectedSort: string;
-  setSelectedSort: (value: React.SetStateAction<string>) => void;
-  sortOptions: string[];
+  filterCategory: string;
+  setFilterCategory: (value: React.SetStateAction<string>) => void;
+  sortBy: string;
+  setSortBy: (value: React.SetStateAction<string>) => void;
 };
 
 const FilterSort = ({
-  categories,
-  selectedCategory,
-  setSelectedCategory,
-  selectedSort,
-  setSelectedSort,
-  sortOptions,
+  filterCategory,
+  setFilterCategory,
+  sortBy,
+  setSortBy,
 }: Props) => {
   return (
     <div className="flex flex-col lg:flex-row items-start justify-between gap-4">
@@ -34,7 +31,20 @@ const FilterSort = ({
           <Filter className="w-4 h-4" />
           <span>Filter by:</span>
         </div>
-        {categories.map((category) => (
+        <Select value={filterCategory} onValueChange={setFilterCategory}>
+          <SelectTrigger className="w-40">
+            <SelectValue placeholder="Category" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Categories</SelectItem>
+            {projectCategoryEnums.map((category) => (
+              <SelectItem key={category} value={category}>
+                {category}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        {/* {categories.map((category) => (
           <Badge
             key={category}
             variant={category === selectedCategory ? "default" : "outline"}
@@ -47,21 +57,19 @@ const FilterSort = ({
           >
             {category}
           </Badge>
-        ))}
+        ))} */}
       </div>
 
       {/* Sort and View Options */}
       <div className="flex items-center gap-3">
-        <Select value={selectedSort} onValueChange={setSelectedSort}>
-          <SelectTrigger className="w-40 h-10 bg-card border-border/50 rounded-xl">
-            <SelectValue />
+        <Select value={sortBy} onValueChange={setSortBy}>
+          <SelectTrigger className="w-40">
+            <SelectValue placeholder="Sort by" />
           </SelectTrigger>
           <SelectContent>
-            {sortOptions.map((option) => (
-              <SelectItem key={option} value={option}>
-                {option}
-              </SelectItem>
-            ))}
+            <SelectItem value="newest">Newest First</SelectItem>
+            <SelectItem value="oldest">Oldest First</SelectItem>
+            <SelectItem value="title">Title A-Z</SelectItem>
           </SelectContent>
         </Select>
       </div>

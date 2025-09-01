@@ -1,109 +1,16 @@
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Timeline } from "@/components/ui/timeline";
-import { TimelineItem } from "@/modules/about/types";
+
+import Journey from "@/modules/about/journey";
+import { JourneyLoading } from "@/modules/about/journey-fallback";
+import Skills from "@/modules/about/skills";
+import { SkillsLoading } from "@/modules/about/skills-fallback";
 import { IconBrandGithub, IconBrandLinkedin } from "@tabler/icons-react";
 import { Download, Mail } from "lucide-react";
 import Link from "next/link";
-import React from "react";
+import React, { Suspense } from "react";
 
 const AboutPage = () => {
-  const skills = [
-    "JavaScript",
-    "TypeScript",
-    "Python",
-    "Node.js",
-    "React",
-    "Next.js",
-    "Express",
-    "FastAPI",
-    "PostgreSQL",
-    "MongoDB",
-    "Redis",
-    "AWS",
-    "Docker",
-    "Kubernetes",
-    "GraphQL",
-    "REST APIs",
-    "Git",
-    "Linux",
-  ];
-
-  const timelineData: TimelineItem[] = [
-    {
-      id: "1",
-      year: "2023",
-      title: "Computer Science Degree",
-      company: "University of Technology",
-      description:
-        "Graduated with honors, specializing in software engineering and web development. Built strong foundations in algorithms, data structures, and modern programming paradigms.",
-      type: "education" as const,
-      skills: [
-        "JavaScript",
-        "Python",
-        "Java",
-        "Database Design",
-        "JavaScript",
-        "Python",
-        "Java",
-        "Database Design",
-        "JavaScript",
-        "Python",
-        "Java",
-        "Database Design",
-      ],
-    },
-    {
-      id: "2",
-      year: "2021",
-      title: "Frontend Developer",
-      company: "TechStart Inc.",
-      description:
-        "Joined as a junior developer and quickly advanced to building complex user interfaces. Led the redesign of the company's main product, improving user engagement by 40%.",
-      type: "work" as const,
-      skills: ["React", "TypeScript", "Tailwind CSS", "Figma"],
-    },
-    {
-      id: "3",
-      year: "2022",
-      title: "E-commerce Platform",
-      description:
-        "Built a full-stack e-commerce platform from scratch using Next.js and Stripe. The project gained 10k+ users within the first month and was featured in several tech blogs.",
-      type: "project" as const,
-      skills: ["Next.js", "Stripe", "PostgreSQL", "Vercel"],
-    },
-    {
-      id: "4",
-      year: "2023",
-      title: "Senior Full-Stack Developer",
-      company: "Innovation Labs",
-      description:
-        "Promoted to senior role, leading a team of 5 developers. Architected microservices infrastructure and mentored junior developers while delivering high-impact features.",
-      type: "work" as const,
-      skills: ["Node.js", "AWS", "Docker", "Team Leadership"],
-    },
-    {
-      id: "5",
-      year: "2024",
-      title: "Open Source Contributor",
-      description:
-        "Became a core contributor to several popular open source projects. My contributions have been used by thousands of developers worldwide, with over 2k GitHub stars.",
-      type: "achievement" as const,
-      skills: ["Open Source", "Community Building", "Documentation"],
-    },
-    {
-      id: "6",
-      year: "2025",
-      title: "Tech Lead & Consultant",
-      company: "Freelance",
-      description:
-        "Transitioned to consulting and technical leadership roles. Currently helping startups build scalable web applications and establishing engineering best practices.",
-      type: "work" as const,
-      skills: ["System Architecture", "Consulting", "Mentoring", "Strategy"],
-    },
-  ];
-
   return (
     <div className="container mx-auto px-4 py-12">
       <div className="max-w-4xl mx-auto">
@@ -157,7 +64,7 @@ const AboutPage = () => {
                     </Link>
                   </Button>
                   <Button variant="outline" size="sm" asChild>
-                    <Link href={"/resume"} target="_blank">
+                    <Link href={"/resume.pdf"} target="_blank">
                       <Download className="mr-2 h-4 w-4" />
                       Resume
                     </Link>
@@ -169,25 +76,14 @@ const AboutPage = () => {
         </Card>
 
         {/* Skills Section */}
-        <div className="mb-12">
-          <h3 className="text-2xl font-bold mb-6">Technical Skills</h3>
-          <div className="flex flex-wrap gap-2">
-            {skills.map((skill, index) => (
-              <Badge
-                key={index}
-                variant="secondary"
-                className="text-sm py-1 px-3"
-              >
-                {skill}
-              </Badge>
-            ))}
-          </div>
-        </div>
+        <Suspense fallback={<SkillsLoading />}>
+          <Skills />
+        </Suspense>
 
         {/* Timeline Section */}
-        <div className="relative pt-10 w-full overflow-clip">
-          <Timeline items={timelineData} />
-        </div>
+        <Suspense fallback={<JourneyLoading />}>
+          <Journey />
+        </Suspense>
       </div>
     </div>
   );

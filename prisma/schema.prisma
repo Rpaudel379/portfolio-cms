@@ -46,6 +46,7 @@ model Timeline {
   description String
   work_type   WorkType @default(WORK)
   skills      String?  @db.Text
+  order       Int      @default(autoincrement())
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

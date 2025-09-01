@@ -1,22 +1,23 @@
 import { Button } from "@/components/ui/button";
 import { projects } from "@/const";
+import { ProjectSchemaDTO } from "@/schema/project.schema";
 import { Search } from "lucide-react";
 import React from "react";
 
 type Props = {
   searchQuery: string;
-  filteredAndSortedProjects: typeof projects;
-  selectedCategory: string;
+  filteredAndSortedProjects: ProjectSchemaDTO[];
+  filterCategory: string;
   setSearchQuery: (value: React.SetStateAction<string>) => void;
-  setSelectedCategory: (value: React.SetStateAction<string>) => void;
+  setFilterCategory: (value: React.SetStateAction<string>) => void;
 };
 
 const ResultsInfo = ({
   filteredAndSortedProjects,
   searchQuery,
-  selectedCategory,
+  filterCategory,
   setSearchQuery,
-  setSelectedCategory,
+  setFilterCategory,
 }: Props) => {
   return (
     <>
@@ -28,7 +29,7 @@ const ResultsInfo = ({
               Found <strong>{filteredAndSortedProjects.length}</strong> project
               {filteredAndSortedProjects.length !== 1 ? "s" : ""}
               {searchQuery && ` matching "${searchQuery}"`}
-              {selectedCategory !== "All" && ` in ${selectedCategory}`}
+              {filterCategory !== "All" && ` in ${filterCategory}`}
             </span>
           </div>
           <Button
@@ -36,7 +37,7 @@ const ResultsInfo = ({
             size="sm"
             onClick={() => {
               setSearchQuery("");
-              setSelectedCategory("All");
+              setFilterCategory("All");
             }}
             className="text-muted-foreground hover:text-foreground"
           >

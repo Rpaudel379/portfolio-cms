@@ -9,11 +9,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import {
-  projectCategoryEnums,
-  projectInitialState,
-  projectStatusEnums,
-} from "@/modules/dashboard/projects/state";
+import { projectInitialState } from "@/modules/dashboard/projects/state";
 import {
   projectSchema,
   ProjectSchema,
@@ -56,6 +52,7 @@ import Technologies from "@/modules/dashboard/projects/forms/technologies";
 import { Thumbnail } from "@/modules/dashboard/projects/forms/thumbnail";
 import { FormPreview } from "@/modules/dashboard/projects/forms/form-preview";
 import { useRouter } from "next/navigation";
+import { projectCategoryEnums, projectStatusEnums } from "@/const";
 
 type Props = {
   project: ProjectSchemaDTO | null;

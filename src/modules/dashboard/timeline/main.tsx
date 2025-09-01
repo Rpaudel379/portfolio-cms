@@ -4,11 +4,17 @@ import { Button } from "@/components/ui/button";
 import { IconPlus, IconX } from "@tabler/icons-react";
 import React, { useState } from "react";
 
-import { deleteTimeline } from "@/app/(dashboard)/dashboard/timeline/_actions";
-import { ServerActionState, serverActionState } from "@/types/common.types";
+import {
+  bulkUpdate,
+  deleteTimeline,
+} from "@/app/(dashboard)/dashboard/timeline/_actions";
+import { ServerActionState } from "@/types/common.types";
 import { TimelineSchemaDTO } from "@/schema/timeline.schema";
 import Timelines from "@/modules/dashboard/timeline/timelines";
 import { TimelineForm } from "@/modules/dashboard/timeline/timeline-form";
+import { TimelinesDnd } from "@/modules/dashboard/timeline/dnd/timelines-dnd";
+import { TimelineItem } from "@/modules/dashboard/timeline/dnd/timeline-item";
+import { toast } from "sonner";
 
 type Props = {
   timelineItems: TimelineSchemaDTO[];
@@ -28,14 +34,20 @@ const TimelinePageClient = ({ timelineItems, saveTimeline }: Props) => {
     setOpenForm(true);
   };
 
-  const onFormClose = () => {
-    setOpenForm(false);
-    setSelectedTimeline(null);
-  };
-
   const onFormToggle = () => {
     setOpenForm((prevState) => !prevState);
     setSelectedTimeline(null);
+  };
+
+  const onTimelineChange = async (newTimeline: TimelineSchemaDTO[]) => {
+    const orderedTimelines = newTimeline.map((timeline, index) => ({
+      ...timeline,
+      order: index,
+    }));
+
+    toast.message("changing timeline...", { description: "Please wait" });
+    await bulkUpdate(orderedTimelines);
+    toast.success("timeline changed!", { duration: 5000 });
   };
 
   return (
@@ -72,11 +84,25 @@ const TimelinePageClient = ({ timelineItems, saveTimeline }: Props) => {
         />
       )}
 
-      <Timelines
+      <div suppressHydrationWarning className="space-y-6">
+        <TimelinesDnd
+          timelines={timelineItems}
+          onTimelineChange={onTimelineChange}
+          renderItem={(timeline) => (
+            <TimelineItem
+              item={timeline}
+              onTimelineSelect={onTimelineSelect}
+              deleteTimeline={deleteTimeline}
+            />
+          )}
+        />
+      </div>
+
+      {/* <Timelines
         timelineItems={timelineItems}
         onTimelineSelect={onTimelineSelect}
         deleteTimeline={deleteTimeline}
-      />
+      /> */}
     </div>
   );
 };

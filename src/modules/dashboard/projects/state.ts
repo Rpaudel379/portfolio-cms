@@ -23,22 +23,3 @@ export const projectInitialState = {
     technologies: {},
   } as ProjectSchema,
 };
-
-export const projectStatusEnums: ProjectStatusEnum[] = [
-  "LIVE",
-  "INPROGRESS",
-  "ARCHIVED",
-  "DEVELOPMENT",
-  "MAINTENANCE",
-];
-
-export const projectCategoryEnums: ProjectCategoryEnum[] = [
-  "Full-Stack",
-  "Frontend",
-  "Backend",
-  "DevOps",
-  "AI/ML",
-];
-
-export const sortOptions = ["newest", "oldest", "title"] as const;
-export type SortOptions = typeof sortOptions;

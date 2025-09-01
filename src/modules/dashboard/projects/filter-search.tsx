@@ -10,10 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  projectCategoryEnums,
-  projectStatusEnums,
-} from "@/modules/dashboard/projects/state";
+import { projectCategoryEnums, projectStatusEnums } from "@/const";
 
 type Props = {
   searchQuery: string;

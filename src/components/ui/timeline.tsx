@@ -3,11 +3,11 @@ import { typeIcons } from "@/app/(dashboard)/_const";
 import LimitedBadge from "@/components/limited-badge";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { TimelineProps } from "@/modules/about/types";
+import { TimelineSchemaDTO } from "@/schema/timeline.schema";
 import { useScroll, useTransform, motion } from "motion/react";
 import React, { useEffect, useRef, useState } from "react";
 
-export const Timeline = ({ items }: TimelineProps) => {
+export const Timeline = ({ items }: { items: TimelineSchemaDTO[] }) => {
   const ref = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [height, setHeight] = useState(0);
@@ -55,7 +55,7 @@ export const Timeline = ({ items }: TimelineProps) => {
                       {item.year}
                     </Badge>
                     <span className="text-xl sm:text-2xl">
-                      {typeIcons[item.type as never]}
+                      {typeIcons[item.work_type as never]}
                     </span>
                   </div>
 
@@ -80,7 +80,7 @@ export const Timeline = ({ items }: TimelineProps) => {
                     <LimitedBadge
                       variant="outline"
                       className="text-xs bg-secondary hover:bg-primary-foreground transition-colors border-border dark:border-border"
-                      items={item.skills}
+                      items={item.skills.split(",")}
                       maxVisibleItems={6}
                       parentClassName="flex flex-wrap gap-1.5 sm:gap-2 "
                     />

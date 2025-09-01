@@ -22,8 +22,6 @@ export const saveProject = async (
   try {
     const isNew: boolean = !("id" in data);
 
-    console.log(data);
-
     if (isNew) {
       const { imageFile, technologies, ...project } = projectSchema.parse(data);
       let thumbnail;

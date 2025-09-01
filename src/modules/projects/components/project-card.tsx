@@ -6,33 +6,11 @@ import { Button } from "@/components/ui/button";
 import { ExternalLink, Github, Eye } from "lucide-react";
 import Image from "next/image";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
-
-interface Project {
-  id: number;
-  title: string;
-  description: string;
-  longDescription?: string;
-  thumbnail: string;
-  tags: string[];
-  category: string;
-  status: string;
-  year: string;
-  github?: string;
-  demo?: string;
-  featured?: boolean;
-  stats?: {
-    users: string;
-    performance: string;
-    rating: number;
-  };
-  features?: string[];
-  challenges?: string;
-  technologies?: Record<string, string[]>;
-}
+import { ProjectSchemaDTO } from "@/schema/project.schema";
 
 interface ProjectCardProps {
-  project: Project;
-  onSelect: (project: Project) => void;
+  project: ProjectSchemaDTO;
+  onSelect: (project: ProjectSchemaDTO) => void;
 }
 
 export function ProjectCard({ project, onSelect }: ProjectCardProps) {
@@ -81,22 +59,13 @@ export function ProjectCard({ project, onSelect }: ProjectCardProps) {
       <div className="relative overflow-hidden bg-gradient-to-br from-primary/5 to-purple-500/5">
         <AspectRatio ratio={16 / 9}>
           <Image
-            src={project.thumbnail || "/logo.png"}
+            src={project.thumbnail || "/placeholder.svg"}
             alt={project.title}
             width={400}
             height={300}
             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
           />
         </AspectRatio>
-
-        {/* Featured Badge */}
-        {project.featured && (
-          <div className="absolute top-3 left-3">
-            <Badge className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white shadow-lg">
-              Featured
-            </Badge>
-          </div>
-        )}
 
         {/* Status Badge */}
         <div className="absolute top-3 right-3">

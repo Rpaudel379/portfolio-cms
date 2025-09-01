@@ -2,12 +2,17 @@
 
 import { prisma } from "@/lib/prisma";
 import { idSchema } from "@/schema/common.schema";
-import { timelineSchema, timeSchemaDTO } from "@/schema/timeline.schema";
+import {
+  timelineSchema,
+  TimelineSchemaDTO,
+  timeSchemaDTO,
+} from "@/schema/timeline.schema";
 import { ServerActionState } from "@/types/common.types";
 import { handlePrismaErrors } from "@/utils/prisma-error";
 import { handleZodErrors } from "@/utils/zod-error";
 import { Prisma } from "@prisma/client";
 import { revalidatePath } from "next/cache";
+import { resolve } from "path";
 import { ZodError } from "zod";
 
 export const saveTimeline = async (
@@ -33,6 +38,7 @@ export const saveTimeline = async (
     }
 
     revalidatePath("/dashboard/timeline");
+    revalidatePath("/about");
 
     return {
       status: "success",
@@ -77,6 +83,43 @@ export const saveTimeline = async (
   }
 };
 
+export const bulkUpdate = async (
+  orderedTimeline: (TimelineSchemaDTO & { order: number })[]
+) => {
+  try {
+    const timeline = await prisma.$transaction(
+      orderedTimeline.map((timeline) =>
+        prisma.timeline.update({
+          where: { id: timeline.id },
+          data: { order: timeline.order },
+        })
+      )
+    );
+
+    revalidatePath("/dashboard/timeline");
+    revalidatePath("/about");
+  } catch (error) {
+    let messageResponse = "Something went wrong";
+    let errorResponse = null;
+
+    if (error instanceof ZodError) {
+      const err = handleZodErrors(error, "general") as string;
+      messageResponse = err;
+    }
+
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      messageResponse = handlePrismaErrors(error);
+    }
+
+    return {
+      status: "failed",
+      message: messageResponse,
+      errors: errorResponse,
+      data: null,
+    };
+  }
+};
+
 export const deleteTimeline = async (
   uuid: string
 ): Promise<ServerActionState<void>> => {
@@ -85,6 +128,7 @@ export const deleteTimeline = async (
     await prisma.timeline.delete({ where: { id: id } });
 
     revalidatePath("/dashboard/timeline");
+    revalidatePath("/about");
 
     return {
       status: "success",
