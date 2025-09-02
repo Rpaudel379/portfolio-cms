@@ -1,5 +1,4 @@
 import { Button } from "@/components/ui/button";
-import { projects } from "@/const";
 import { ProjectCard } from "@/modules/projects/components/project-card";
 import { ProjectSchemaDTO } from "@/schema/project.schema";
 import { Search } from "lucide-react";
