@@ -7,6 +7,7 @@ import {
   IconTimeline,
   IconUser,
   IconDatabase,
+  IconFileCv,
 } from "@tabler/icons-react";
 
 export const dashboardItems = [
@@ -42,6 +43,11 @@ export const contentItems = [
     title: "Storage",
     url: "/dashboard/storage",
     icon: IconDatabase,
+  },
+  {
+    title: "Resume",
+    url: "/dashboard/resume",
+    icon: IconFileCv,
   },
 ];
 

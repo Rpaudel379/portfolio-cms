@@ -1,8 +1,4 @@
-import {
-  ProjectCategoryEnum,
-  ProjectSchema,
-  ProjectStatusEnum,
-} from "@/schema/project.schema";
+import { ProjectSchema } from "@/schema/project.schema";
 
 export const projectInitialState = {
   errors: null,
@@ -15,7 +11,7 @@ export const projectInitialState = {
     year: "",
     github: "",
     demo: "",
-    features: [],
+    features: [""],
     challenges: "",
     thumbnail: "",
     imageId: "",

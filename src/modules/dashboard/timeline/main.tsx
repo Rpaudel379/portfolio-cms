@@ -41,7 +41,7 @@ const TimelinePageClient = ({ timelineItems, saveTimeline }: Props) => {
   const onTimelineChange = async (newTimeline: TimelineSchemaDTO[]) => {
     const orderedTimelines = newTimeline.map((timeline, index) => ({
       ...timeline,
-      order: index,
+      order: newTimeline.length - index,
     }));
 
     toast.message("changing timeline...", { description: "Please wait" });
@@ -96,12 +96,6 @@ const TimelinePageClient = ({ timelineItems, saveTimeline }: Props) => {
           )}
         />
       </div>
-
-      {/* <Timelines
-        timelineItems={timelineItems}
-        onTimelineSelect={onTimelineSelect}
-        deleteTimeline={deleteTimeline}
-      /> */}
     </div>
   );
 };

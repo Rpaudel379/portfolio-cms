@@ -29,7 +29,7 @@ import Image from "next/image";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
-import { cn } from "@/lib/utils";
+import { cn, getStatusColor, getStatusDot } from "@/lib/utils";
 import { ProjectSchemaDTO } from "@/schema/project.schema";
 
 interface ProjectDrawerProps {
@@ -68,9 +68,15 @@ export function ProjectDrawer({
                   </Badge>
                   <Badge
                     variant="outline"
-                    className="text-xs border-green-500/30 text-green-600 dark:text-green-400"
+                    className={`backdrop-blur-sm ${getStatusColor(
+                      project.status
+                    )}`}
                   >
-                    <div className="w-2 h-2 bg-green-500 rounded-full mr-1 animate-pulse" />
+                    <div
+                      className={`w-2 h-2 rounded-full mr-2 animate-pulse ${getStatusDot(
+                        project.status
+                      )}`}
+                    />
                     {project.status}
                   </Badge>
                 </div>
@@ -108,11 +114,13 @@ export function ProjectDrawer({
                 </DrawerDescription>
               </VisuallyHidden>
 
-              <div className="flex items-center gap-2">
-                <Calendar className="w-4 h-4 text-primary" />
-                <span className="font-medium">Year:</span>
-                <span className="text-muted-foreground">{project.year}</span>
-              </div>
+              {project.year && (
+                <div className="flex items-center gap-2">
+                  <Calendar className="w-4 h-4 text-primary" />
+                  <span className="font-medium">Year:</span>
+                  <span className="text-muted-foreground">{project.year}</span>
+                </div>
+              )}
 
               <div>
                 <h4 className="font-semibold mb-2 flex items-center gap-2">
@@ -126,7 +134,7 @@ export function ProjectDrawer({
             </div>
 
             {/* Features */}
-            {project.features && (
+            {project.features.length > 0 && (
               <div>
                 <h4 className="font-semibold mb-3 flex items-center gap-2">
                   <Lightbulb className="w-4 h-4 text-primary" />
@@ -162,45 +170,46 @@ export function ProjectDrawer({
             <Separator />
 
             {/* All Technologies */}
-            <div>
-              <h4 className="font-semibold mb-4 flex items-center gap-2">
-                <Tag className="w-4 h-4 text-primary" />
-                All Technologies Used
-              </h4>
-              {project.technologies ? (
-                <div className="space-y-4">
-                  {Object.entries(project.technologies).map(
-                    ([category, techs]) => (
-                      <div key={category}>
-                        <h5 className="text-sm font-medium text-muted-foreground mb-2">
-                          {category}
-                        </h5>
-                        <div className="flex flex-wrap gap-2">
-                          {techs.map((tech, index) => (
-                            <Badge
-                              key={index}
-                              variant="secondary"
-                              className="text-xs"
-                            >
-                              {tech}
-                            </Badge>
-                          ))}
+            {project.technologies && project.tags.length > 0 && (
+              <div>
+                <h4 className="font-semibold mb-4 flex items-center gap-2">
+                  <Tag className="w-4 h-4 text-primary" />
+                  All Technologies Used
+                </h4>
+                {project.technologies ? (
+                  <div className="space-y-4">
+                    {Object.entries(project.technologies).map(
+                      ([category, techs]) => (
+                        <div key={category}>
+                          <h5 className="text-sm font-medium text-muted-foreground mb-2">
+                            {category}
+                          </h5>
+                          <div className="flex flex-wrap gap-2">
+                            {techs.map((tech, index) => (
+                              <Badge
+                                key={index}
+                                variant="secondary"
+                                className="text-xs"
+                              >
+                                {tech}
+                              </Badge>
+                            ))}
+                          </div>
                         </div>
-                      </div>
-                    )
-                  )}
-                </div>
-              ) : (
-                <div className="flex flex-wrap gap-2">
-                  {project.tags.map((tag, index) => (
-                    <Badge key={index} variant="secondary">
-                      {tag}
-                    </Badge>
-                  ))}
-                </div>
-              )}
-            </div>
-
+                      )
+                    )}
+                  </div>
+                ) : (
+                  <div className="flex flex-wrap gap-2">
+                    {project.tags.map((tag, index) => (
+                      <Badge key={index} variant="secondary">
+                        {tag}
+                      </Badge>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
             {/* Additional spacing at bottom for mobile */}
             <div className="h-4" />
           </div>

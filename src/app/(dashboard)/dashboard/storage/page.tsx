@@ -4,9 +4,7 @@ import { IconBucket } from "@tabler/icons-react";
 import Link from "next/link";
 import React from "react";
 
-type Props = {};
-
-const StoragePage = async (props: Props) => {
+const StoragePage = async () => {
   const supabase = await createClient();
   // initSupabaseStorage({ supabase });
   const buckets = await supabase.storage.listBuckets();

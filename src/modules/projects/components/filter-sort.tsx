@@ -6,7 +6,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { projectCategoryEnums } from "@/const";
+import { CategoryEnum } from "@/const";
 import { Filter } from "lucide-react";
 import React from "react";
 
@@ -37,7 +37,7 @@ const FilterSort = ({
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Categories</SelectItem>
-            {projectCategoryEnums.map((category) => (
+            {Object.values(CategoryEnum).map((category) => (
               <SelectItem key={category} value={category}>
                 {category}
               </SelectItem>

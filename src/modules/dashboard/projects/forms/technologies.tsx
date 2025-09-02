@@ -30,23 +30,23 @@ import {
 } from "@/components/ui/select";
 import { Trash2Icon } from "lucide-react";
 import { FormField, FormItem, FormMessage } from "@/components/ui/form";
+import { CategoryEnum } from "@/const";
 
 type Technology = Record<string, string[]>;
 
 type Props = {
   tags: SkillSchemaDTO[] | null;
-  categories: ProjectCategoryEnum[];
   data?: Technology | null;
 };
 
-const Technologies = ({ tags, categories, data }: Props) => {
+const Technologies = ({ tags, data }: Props) => {
   const { setValue, control } = useFormContext();
 
   const [technologies, setTechnologies] = useState<Technology>(data ?? {});
 
   const availableCategories = () => {
     const techCategories = Object.keys(technologies);
-    return categories.filter(
+    return Object.values(CategoryEnum).filter(
       (cat) => !techCategories.find((existing) => existing === cat)
     );
   };
@@ -152,7 +152,10 @@ const Technologies = ({ tags, categories, data }: Props) => {
                           values={technologies[category]}
                         >
                           <MultiSelectTrigger className="w-full">
-                            <MultiSelectValue placeholder="select tags..." />
+                            <MultiSelectValue
+                              placeholder="select tags..."
+                              overflowBehavior="wrap"
+                            />
                           </MultiSelectTrigger>
 
                           <MultiSelectContent>

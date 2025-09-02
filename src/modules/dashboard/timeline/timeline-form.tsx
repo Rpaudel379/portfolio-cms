@@ -197,6 +197,7 @@ export const TimelineForm = ({
                         <Textarea
                           placeholder="Brief description of your role and achievements..."
                           {...field}
+                          rows={10}
                         />
                       </FormControl>
                     </FormItem>

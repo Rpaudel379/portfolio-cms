@@ -53,6 +53,7 @@ export const projectSchemaDTO = projectSchema.extend({
   updatedAt: z.date().or(z.string()),
   thumbnail: z.string().nullish(),
   imageId: z.string().nullish(),
+  imagePath: z.string().nullish(),
 });
 
 export type ProjectSchemaDTO = z.infer<typeof projectSchemaDTO>;

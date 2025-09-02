@@ -10,7 +10,12 @@ import {
 } from "@/schema/project.schema";
 import { ServerActionState } from "@/types/common.types";
 import { handlePrismaErrors } from "@/utils/prisma-error";
-import { getPublicUrl, uploadFileToBucket } from "@/utils/supabase/file";
+import {
+  deleteObjectFromBucket,
+  getPublicUrl,
+  replaceObjectFromBucket,
+  uploadFileToBucket,
+} from "@/utils/supabase/file";
 import { handleZodErrors } from "@/utils/zod-error";
 import { Prisma } from "@prisma/client";
 import { revalidatePath } from "next/cache";
@@ -21,11 +26,12 @@ export const saveProject = async (
 ): Promise<ServerActionState<void>> => {
   try {
     const isNew: boolean = !("id" in data);
-
     if (isNew) {
       const { imageFile, technologies, ...project } = projectSchema.parse(data);
       let thumbnail;
       let imageId;
+      let imagePath;
+
       if (imageFile) {
         const { data, error } = await uploadFileToBucket(
           imageFile,
@@ -37,6 +43,7 @@ export const saveProject = async (
           if (publicUrl.length) {
             thumbnail = publicUrl;
             imageId = data?.id;
+            imagePath = data?.path;
           }
         }
       }
@@ -47,6 +54,7 @@ export const saveProject = async (
           technologies: { ...technologies },
           thumbnail,
           imageId,
+          imagePath,
         },
       });
     } else {
@@ -54,18 +62,41 @@ export const saveProject = async (
         projectSchemaDTO.parse(data);
       let thumbnail = project?.thumbnail;
       let imageId = project?.imageId;
-
+      let imagePath = project?.imagePath;
       if (imageFile) {
-        const { data, error } = await uploadFileToBucket(
-          imageFile,
-          "thumbnail_bucket"
-        );
+        if (imagePath) {
+          const { data, error } = await replaceObjectFromBucket(
+            imagePath,
+            "thumbnail_bucket",
+            imageFile
+          );
+          if (!error) {
+            const publicUrl = await getPublicUrl(
+              data?.path!,
+              "thumbnail_bucket"
+            );
+            if (publicUrl.length) {
+              thumbnail = publicUrl;
+              imageId = data?.id;
+              imagePath = data?.path;
+            }
+          }
+        } else {
+          const { data, error } = await uploadFileToBucket(
+            imageFile,
+            "thumbnail_bucket"
+          );
 
-        if (!error) {
-          const publicUrl = await getPublicUrl(data?.path!, "thumbnail_bucket");
-          if (publicUrl.length) {
-            thumbnail = publicUrl;
-            imageId = data?.id;
+          if (!error) {
+            const publicUrl = await getPublicUrl(
+              data?.path!,
+              "thumbnail_bucket"
+            );
+            if (publicUrl.length) {
+              thumbnail = publicUrl;
+              imageId = data?.id;
+              imagePath = data?.path;
+            }
           }
         }
       }
@@ -77,11 +108,13 @@ export const saveProject = async (
           technologies: { ...technologies },
           thumbnail,
           imageId,
+          imagePath,
         },
       });
     }
 
     revalidatePath("/dashboard/projects");
+    revalidatePath("/projects");
 
     return {
       status: "success",
@@ -103,11 +136,9 @@ export const saveProject = async (
     }
 
     console.log("create timeline error");
-    console.dir(error, { depth: null });
 
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
       console.log("inside create timeline PrismaClientKnownRequestError");
-      console.dir(error, { depth: null });
       if (error.code === "P2002") {
         messageResponse = "Skill already exists";
       } else if (error.code === "P2023") {
@@ -132,8 +163,16 @@ export const deleteProject = async (
   try {
     const id = idSchema.parse(uuid);
 
+    const project = await prisma.project.findFirstOrThrow({ where: { id } });
+
     await prisma.project.delete({ where: { id } });
+
+    if (project.imagePath) {
+      await deleteObjectFromBucket(project.imagePath, "thumbnail_bucket");
+    }
+
     revalidatePath("/dashboard/projects");
+    revalidatePath("/projects");
 
     return {
       status: "success",

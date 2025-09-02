@@ -52,7 +52,9 @@ import Technologies from "@/modules/dashboard/projects/forms/technologies";
 import { Thumbnail } from "@/modules/dashboard/projects/forms/thumbnail";
 import { FormPreview } from "@/modules/dashboard/projects/forms/form-preview";
 import { useRouter } from "next/navigation";
-import { projectCategoryEnums, projectStatusEnums } from "@/const";
+import { CategoryEnum, StatusEmum } from "@/const";
+import Features from "@/modules/dashboard/projects/forms/features";
+import { Challenges } from "@/modules/dashboard/projects/forms/challenges";
 
 type Props = {
   project: ProjectSchemaDTO | null;
@@ -183,7 +185,7 @@ const ProjectForm = ({ project, tags, saveSkill }: Props) => {
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
-                              {projectCategoryEnums.map((category) => (
+                              {Object.values(CategoryEnum).map((category) => (
                                 <SelectItem value={category} key={category}>
                                   <span className="capitalize">{category}</span>
                                 </SelectItem>
@@ -218,8 +220,11 @@ const ProjectForm = ({ project, tags, saveSkill }: Props) => {
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
-                              {projectStatusEnums.map((status) => (
-                                <SelectItem value={status} key={status}>
+                              {Object.values(StatusEmum).map((status) => (
+                                <SelectItem
+                                  value={status.toString()}
+                                  key={status.toString()}
+                                >
                                   <span className="capitalize">{status}</span>
                                 </SelectItem>
                               ))}
@@ -306,12 +311,16 @@ const ProjectForm = ({ project, tags, saveSkill }: Props) => {
             </Card>
 
             {/* technologies */}
-            <Technologies tags={tags} categories={projectCategoryEnums} />
+            <Technologies tags={tags} data={project?.technologies} />
 
             {/* links */}
             <Links />
 
             <Thumbnail />
+
+            <Features />
+
+            <Challenges />
           </form>
         </div>
 

@@ -15,12 +15,13 @@ export default function GlobalError({
     <div className="h-[90vh] flex items-center justify-center">
       <div className="flex flex-col gap-10">
         <h1>Something went wrong</h1>
-        {error.message}
+        <p>{error.message}</p>
+
         <Link
-          href={"/dashboard/storage"}
+          href={"/dashboard/resume"}
           className="bg-accent w-fit p-2 rounded-lg hover:bg-primary-foreground"
         >
-          Go to storage
+          Go to resume
         </Link>
       </div>
     </div>

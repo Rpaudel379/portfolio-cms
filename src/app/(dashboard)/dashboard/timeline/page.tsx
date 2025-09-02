@@ -8,7 +8,7 @@ type Props = {};
 const TimelinePage = async () => {
   const getAllTimelines = async () => {
     return await prisma.timeline.findMany({
-      orderBy: { order: "asc" },
+      orderBy: { order: "desc" },
     });
   };
 

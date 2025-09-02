@@ -75,6 +75,7 @@ model Project {
   technologies Json?         @db.JsonB
   thumbnail    String?
   imageId      String?
+  imagePath    String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

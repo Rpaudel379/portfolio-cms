@@ -1,6 +1,5 @@
 "use client";
 
-import { projects } from "@/const";
 import FilterSort from "@/modules/projects/components/filter-sort";
 import { ProjectDrawer } from "@/modules/projects/components/project-drawer";
 import ProjectGrid from "@/modules/projects/components/project-grid";
@@ -11,7 +10,6 @@ import { useRouter, useSearchParams } from "next/navigation";
 import React, {
   Dispatch,
   SetStateAction,
-  useEffect,
   useLayoutEffect,
   useMemo,
   useState,

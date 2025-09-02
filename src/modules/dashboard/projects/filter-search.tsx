@@ -10,7 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { projectCategoryEnums, projectStatusEnums } from "@/const";
+import { CategoryEnum, StatusEmum } from "@/const";
 
 type Props = {
   searchQuery: string;
@@ -69,7 +69,7 @@ const FilterSearch = ({
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Categories</SelectItem>
-                {projectCategoryEnums.map((category) => (
+                {Object.values(CategoryEnum).map((category) => (
                   <SelectItem key={category} value={category}>
                     {category}
                   </SelectItem>
@@ -83,8 +83,8 @@ const FilterSearch = ({
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Status</SelectItem>
-                {projectStatusEnums.map((status) => (
-                  <SelectItem key={status} value={status}>
+                {Object.values(StatusEmum).map((status) => (
+                  <SelectItem key={status.toString()} value={status.toString()}>
                     {status}
                   </SelectItem>
                 ))}
