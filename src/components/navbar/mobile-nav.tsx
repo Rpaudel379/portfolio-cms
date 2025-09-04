@@ -58,6 +58,7 @@ export const MobileNav = ({ items, pathname }: NavbarItems) => {
             <div className="flex flex-col space-y-3">
               {items.map((item) => (
                 <Link
+                  prefetch={false}
                   key={item.name}
                   href={item.href}
                   onClick={() => setIsOpen(false)}

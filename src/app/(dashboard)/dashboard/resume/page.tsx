@@ -1,7 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 
 import { ResumePageClient } from "@/modules/dashboard/resume/main";
-import { getPublicUrl } from "@/utils/supabase/file";
 import { notFound } from "next/navigation";
 import React from "react";
 

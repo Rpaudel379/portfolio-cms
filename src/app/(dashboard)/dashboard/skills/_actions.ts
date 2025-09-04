@@ -34,8 +34,8 @@ export const saveSkill = async (
       });
     }
 
-    revalidatePath("/dashboard/skills");
     revalidatePath("/about");
+    revalidatePath("/dashboard/skills");
     return {
       status: "success",
       message: `Skill ${isNew ? "Created" : "Updated"}`,
@@ -75,8 +75,8 @@ export const deleteSkill = async (
 
     await prisma.skill.delete({ where: { id: id } });
 
-    revalidatePath("/dashboard/skills");
     revalidatePath("/about");
+    revalidatePath("/dashboard/skills");
 
     return {
       status: "success",

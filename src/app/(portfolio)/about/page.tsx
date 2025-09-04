@@ -1,3 +1,5 @@
+export const dynamic = "force-static";
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -64,7 +66,7 @@ const AboutPage = () => {
                     </Link>
                   </Button>
                   <Button variant="outline" size="sm" asChild>
-                    <Link href={"/resume.pdf"} target="_blank">
+                    <Link href={"/resume"} target="_blank">
                       <Download className="mr-2 h-4 w-4" />
                       Resume
                     </Link>

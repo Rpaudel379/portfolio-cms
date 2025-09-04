@@ -1,3 +1,5 @@
+export const dynamic = "force-static"; // 👈 ensures static generation
+
 import { prisma } from "@/lib/prisma";
 import ProjectPageClient from "@/modules/projects/components/main";
 import { ProjectSchemaDTO } from "@/schema/project.schema";

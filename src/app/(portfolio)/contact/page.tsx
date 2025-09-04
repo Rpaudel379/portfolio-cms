@@ -1,3 +1,4 @@
+export const dynamic = "force-static";
 import { prisma } from "@/lib/prisma";
 import { ContactPageClient } from "@/modules/contact/main";
 import { ContactSchemaDTO } from "@/schema/contact.schema";

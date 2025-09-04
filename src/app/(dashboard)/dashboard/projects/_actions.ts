@@ -113,8 +113,8 @@ export const saveProject = async (
       });
     }
 
-    revalidatePath("/dashboard/projects");
     revalidatePath("/projects");
+    revalidatePath("/dashboard/projects");
 
     return {
       status: "success",
@@ -171,8 +171,8 @@ export const deleteProject = async (
       await deleteObjectFromBucket(project.imagePath, "thumbnail_bucket");
     }
 
-    revalidatePath("/dashboard/projects");
     revalidatePath("/projects");
+    revalidatePath("/dashboard/projects");
 
     return {
       status: "success",

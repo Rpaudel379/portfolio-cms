@@ -98,7 +98,7 @@ const HomePage = () => {
                   size="lg"
                   className="group relative overflow-hidden"
                 >
-                  <Link href="/about">
+                  <Link href="/about" prefetch={false}>
                     <span className="relative z-10">View My Journey</span>
                     <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
                     <div className="absolute inset-0 bg-gradient-to-r from-primary to-purple-600 opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -110,7 +110,7 @@ const HomePage = () => {
                   asChild
                   className="group bg-transparent"
                 >
-                  <Link href="/contact">
+                  <Link href="/contact" prefetch={false}>
                     <Mail className="mr-2 h-4 w-4" />
                     <span>Let's Connect</span>
                   </Link>
@@ -147,7 +147,7 @@ const HomePage = () => {
                     size="icon"
                     className="h-9 w-9 hover:bg-primary/10 hover:text-primary"
                   >
-                    <Link href={"/resume"}>
+                    <Link href={"/resume"} prefetch={false}>
                       <Download className="h-4 w-4" />
                     </Link>
                   </Button>

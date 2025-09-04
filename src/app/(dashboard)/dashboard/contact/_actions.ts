@@ -1,10 +1,6 @@
 "use server";
 
-import {
-  ContactSchema,
-  ContactSchemaDTO,
-  contactSchemaDTO,
-} from "@/schema/contact.schema";
+import { ContactSchemaDTO, contactSchemaDTO } from "@/schema/contact.schema";
 import { prisma } from "@/lib/prisma";
 import { ServerActionState } from "@/types/common.types";
 import { handleZodErrors } from "@/utils/zod-error";
@@ -23,8 +19,8 @@ export const updateContactInfo = async (
       data: contactInfo,
     });
 
-    revalidatePath("/dashboard/contact");
     revalidatePath("/contact");
+    revalidatePath("/dashboard/contact");
     return {
       status: "success",
       message: "Contact Info updated",

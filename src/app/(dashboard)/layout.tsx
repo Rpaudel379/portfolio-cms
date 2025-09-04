@@ -6,6 +6,7 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
+import { ClerkProvider } from "@clerk/nextjs";
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
 
@@ -23,14 +24,16 @@ export default async function RootLayout({
   const isDefaultOpen = cookieStore.get("sidebar_state")?.value === "true";
 
   return (
-    <ConfirmProvider>
-      <SidebarProvider defaultOpen={isDefaultOpen}>
-        <SidebarDashboard />
-        <SidebarInset className="p-5">
-          <SiteHeader />
-          {children}
-        </SidebarInset>
-      </SidebarProvider>
-    </ConfirmProvider>
+    <ClerkProvider>
+      <ConfirmProvider>
+        <SidebarProvider defaultOpen={isDefaultOpen}>
+          <SidebarDashboard />
+          <SidebarInset className="p-5">
+            <SiteHeader />
+            {children}
+          </SidebarInset>
+        </SidebarProvider>
+      </ConfirmProvider>
+    </ClerkProvider>
   );
 }

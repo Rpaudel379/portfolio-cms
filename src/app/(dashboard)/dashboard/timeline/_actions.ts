@@ -37,8 +37,8 @@ export const saveTimeline = async (
       });
     }
 
-    revalidatePath("/dashboard/timeline");
     revalidatePath("/about");
+    revalidatePath("/dashboard/timeline");
 
     return {
       status: "success",
@@ -96,8 +96,8 @@ export const bulkUpdate = async (
       )
     );
 
-    revalidatePath("/dashboard/timeline");
     revalidatePath("/about");
+    revalidatePath("/dashboard/timeline");
   } catch (error) {
     let messageResponse = "Something went wrong";
     let errorResponse = null;
