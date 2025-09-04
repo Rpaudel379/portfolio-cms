@@ -54,6 +54,7 @@ export const replaceResume = async (
     }
 
     revalidatePath("/resume");
+    revalidatePath("/sde");
     revalidatePath("/dashboard/resume");
 
     return {
