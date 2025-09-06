@@ -27,7 +27,7 @@ export const projectSchema = z.object(
     description: z
       .string({ error: "description is required" })
       .min(5, "Description is too short")
-      .max(500, "Description is too long"),
+      .max(1000, "Description is too long"),
     tags: z.array(z.string()),
     category: projectCategoryEnum,
     status: projectStatusEnum,

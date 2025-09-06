@@ -58,6 +58,7 @@ enum ProjectStatus {
   INPROGRESS
   MAINTENANCE
   ARCHIVED
+  COMPLETE
 }
 
 model Project {
@@ -76,6 +77,7 @@ model Project {
   thumbnail    String?
   imageId      String?
   imagePath    String?
+  visible      Boolean       @default(true)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

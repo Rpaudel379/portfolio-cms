@@ -11,7 +11,7 @@ export const projectInitialState = {
     year: "",
     github: "",
     demo: "",
-    features: [""],
+    features: [],
     challenges: "",
     thumbnail: "",
     imageId: "",
