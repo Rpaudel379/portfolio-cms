@@ -15,8 +15,10 @@ datasource db {
 }
 
 model Skill {
-  id        String   @id @default(uuid()) @db.Uuid
-  name      String   @unique
+  id      String  @id @default(uuid()) @db.Uuid
+  name    String  @unique
+  visible Boolean @default(true)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }

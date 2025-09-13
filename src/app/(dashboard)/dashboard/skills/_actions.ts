@@ -1,7 +1,12 @@
 "use server";
 
 import { idSchema } from "@/schema/common.schema";
-import { skillSchema, skillSchemaDTO } from "@/schema/skill.schema";
+import {
+  SkillSchema,
+  skillSchema,
+  SkillSchemaDTO,
+  skillSchemaDTO,
+} from "@/schema/skill.schema";
 import { prisma } from "@/lib/prisma";
 import { ServerActionState } from "@/types/common.types";
 import { SaveSkill } from "@/types/skill.types";
@@ -12,25 +17,23 @@ import { Prisma } from "@prisma/client";
 import { handlePrismaErrors } from "@/utils/prisma-error";
 
 export const saveSkill = async (
-  data: SaveSkill
+  data: SkillSchema | SkillSchemaDTO
 ): Promise<ServerActionState<null>> => {
   try {
-    const isNew: boolean = typeof data === "string";
+    const isNew: boolean = !("id" in data);
 
     if (isNew) {
-      const name = skillSchema.parse(data);
+      const skill = skillSchema.parse(data);
 
       await prisma.skill.create({
-        data: { name },
+        data: skill,
       });
     } else {
-      const { id, name } = skillSchemaDTO.parse(data);
+      const { id, createdAt, updatedAt, ...skill } = skillSchemaDTO.parse(data);
 
       await prisma.skill.update({
         where: { id: id },
-        data: {
-          name,
-        },
+        data: skill,
       });
     }
 
@@ -51,7 +54,7 @@ export const saveSkill = async (
       messageResponse = err;
     }
 
-    console.log("delete skill error");
+    console.log("save skill error");
     console.dir(error, { depth: null });
 
     if (error instanceof Prisma.PrismaClientKnownRequestError) {

@@ -12,9 +12,8 @@ const SkillsPage = async () => {
   };
 
   const skills = await getAllSkills();
-
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 mx-auto container">
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Technical Skills</h1>
         <p className="text-muted-foreground">

@@ -4,7 +4,10 @@ import React from "react";
 
 const Skills = async () => {
   const getAllSkills = async () => {
-    return await prisma.skill.findMany({ orderBy: { updatedAt: "desc" } });
+    return await prisma.skill.findMany({
+      orderBy: { updatedAt: "desc" },
+      where: { visible: true },
+    });
   };
 
   const skills = await getAllSkills();
