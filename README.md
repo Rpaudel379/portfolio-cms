@@ -1,36 +1,158 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 📌 Portfolio CMS
 
-## Getting Started
+A **dynamic portfolio website** powered by a self-built mini CMS.  
+Instead of manually editing code and running `git commit && git push` every time I want to update my portfolio, this project lets me log in as an admin, change data (skills, projects, resume, contact info), and see it instantly reflected on the public-facing site. 🚀
 
-First, run the development server:
+---
+
+## ✨ Features
+
+- 🔑 **Authentication with Clerk** – secure admin dashboard
+- 🖥️ **Two Sections**
+  - **Client-facing portfolio** → About Me, Projects, Skills, Contact Info, Resume
+  - **Admin dashboard** → Manage all portfolio content dynamically
+- 📄 **Resume Upload** – upload and replace resume files from dashboard
+  - Access via `/resume` or `/sde`
+- 🛢️ **Database + Storage** powered by **Supabase**
+  - PostgreSQL for structured data
+  - Supabase Storage Buckets for resumes & thumbnails
+- ⚡ **Prisma ORM** for type-safe DB access
+- 🎨 **UI & Styling**
+
+  - Tailwind CSS + shadcn/ui
+  - Animations with [react-bits](https://reactbits.dev/) & [aceternity](https://ui.aceternity.com/)
+
+- 🔄 **Instant Updates** – client site reflects changes without redeploying
+- **📌 Draggable Timeline / Experience** – Timeline/experience section supports drag-and-drop sorting for easy reordering from the dashboard.
+
+---
+
+## 🛠️ Tech Stack
+
+- **Frontend:** Next.js, React, Tailwind CSS, shadcn/ui
+- **Backend:** Next.js (server components & server actions)
+- **Auth:** Clerk
+- **Database:** Supabase PostgreSQL + Prisma ORM
+- **Storage:** Supabase Buckets
+- **Animations:** react-bits, aceternity
+- **Other Tools:** TypeScript
+
+---
+
+## 🚀 Getting Started
+
+### 1️⃣ Clone the repo
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/YOUR_USERNAME/portfolio-cms.git
+cd portfolio-cms
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2️⃣ Install dependencies
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```
+npm install
+# or
+bun install
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 3️⃣ Environment variables
 
-## Learn More
+Create a `.env` file in the root and add:
 
-To learn more about Next.js, take a look at the following resources:
+```
+cp .env.example .env
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+# or
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+NODE_ENV="<development | production>"
 
-## Deploy on Vercel
+DATABASE_URL="<url>/postgres?pgbouncer=true"
+DIRECT_URL="<url>/postgres"
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+NEXT_PUBLIC_SUPABASE_URL="<your supabase base url>"
+NEXT_PUBLIC_SUPABASE_ANON_KEY="<get from supabase dashboard>"
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY="<get from clerk>"
+CLERK_SECRET_KEY="<get from clerk>"
+```
+
+### 4️⃣ Run database migrations:
+
+```
+npx prisma migrate dev
+# or
+bunx prisma migrate dev
+```
+
+### 5️⃣ Run locally
+
+```
+npm run dev
+# or
+bun run dev
+```
+
+### 6️⃣ Build for production
+
+```
+npm run build
+npm run start
+
+# or
+bun run build
+bun run start
+```
+
+## 📂 Project Structure
+
+```bash
+.
+├── prisma/               # Prisma schema and migrations
+├── public/               # Static assets (images, icons, etc.)
+├── scripts/              # Utility and prestart scripts
+├── src/                  # Application source code
+│   ├── app/              # Next.js App Router
+│   │   ├── (dashboard)/  # Admin dashboard (authenticated CMS)
+│   │   ├── (portfolio)/  # Public portfolio pages
+│   │   ├── favicon.ico   # App favicon
+│   │   ├── global-error.tsx  # Global error boundary
+│   │   ├── globals.css   # Global styles
+│   │   ├── layout.tsx    # Root layout
+│   │   └── signin/       # Sign-in page
+│   │
+│   ├── components/       # Reusable UI components
+│   ├── hooks/            # Custom React hooks
+│   ├── lib/              # Core libraries & configs
+│   ├── modules/          # Feature-specific modules
+│   ├── schema/           # Zod/validation schemas
+│   ├── types/            # TypeScript types
+│   └── utils/            # Utility functions
+│
+├── .env                  # Environment variables
+├── package.json          # Project dependencies and scripts
+└── README.md             # Project documentation
+```
+
+## 🔗 Live Demo
+
+[🌐 View Live Demo](https://anishsite.netlify.app)
+
+## 🔮 Future Improvements
+
+- 🔧 **Code Refactoring & Consistency**  
+  Improve code quality by refactoring existing modules and enforcing consistent patterns, naming conventions, and folder structures.
+
+- 🔐 **Authentication Overhaul**  
+  Replace Clerk with a faster, self-hosted authentication system, ensuring credentials are stored securely in our own database while reducing dependency on third-party services.
+
+- ⚡ **Performance Optimization**  
+  Implement React caching, server-side caching, or edge functions to significantly improve load times and responsiveness in production.
+
+- 🗄️ **Database Optimization**  
+  Introduce indexing, optimized queries, and caching layers
+
+## 🤝 Contributing
+
+Want to improve this project? PRs are welcome!
+Fork it, create a new branch, and submit a pull request 🚀
