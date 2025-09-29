@@ -2,7 +2,7 @@ import { idSchema } from "@/schema/common.schema";
 import z from "zod";
 
 export const projectStatusEnum = z.enum(
-  ["LIVE", "DEVELOPMENT", "INPROGRESS", "MAINTENANCE", "ARCHIVED"],
+  ["LIVE", "DEVELOPMENT", "COMPLETE", "INPROGRESS", "MAINTENANCE", "ARCHIVED"],
   { error: "valid status is required" }
 );
 
