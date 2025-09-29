@@ -45,7 +45,7 @@ import {
 } from "@/components/ui/multi-select";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { SkillSchemaDTO } from "@/schema/skill.schema";
+import { SkillSchema, SkillSchemaDTO } from "@/schema/skill.schema";
 import { useCustomAction } from "@/hooks/use-custom-action";
 import { Links } from "@/modules/dashboard/projects/forms/links";
 import Technologies from "@/modules/dashboard/projects/forms/technologies";
@@ -59,7 +59,7 @@ import { Challenges } from "@/modules/dashboard/projects/forms/challenges";
 type Props = {
   project: ProjectSchemaDTO | null;
   tags: SkillSchemaDTO[] | null;
-  saveSkill: (data: string) => Promise<ServerActionState<null>>;
+  saveSkill: (data: SkillSchema) => Promise<ServerActionState<null>>;
 };
 
 const ProjectForm = ({ project, tags, saveSkill }: Props) => {
@@ -290,7 +290,7 @@ const ProjectForm = ({ project, tags, saveSkill }: Props) => {
                             emptyMessage: "No results found.",
                           }}
                           onCreate={(value: string) => {
-                            saveTag(value);
+                            saveTag({ name: value, visible: false });
                             field.onChange([...(field.value || []), value]);
                           }}
                         >
