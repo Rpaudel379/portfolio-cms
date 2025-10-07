@@ -44,7 +44,7 @@ Instead of manually editing code and running `git commit && git push` every time
 ### 1️⃣ Clone the repo
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/portfolio-cms.git
+git clone https://github.com/rpaudel379/portfolio-cms.git
 cd portfolio-cms
 ```
 
