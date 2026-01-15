@@ -1,9 +1,11 @@
-export const dynamic = "force-static";
 import { prisma } from "@/lib/prisma";
 import { ContactPageClient } from "@/modules/contact/main";
 import { ContactSchemaDTO } from "@/schema/contact.schema";
+import { cacheTag } from "next/cache";
 
 export default async function Contact() {
+  "use cache";
+  cacheTag("contact");
   const getContactDetail = async () => {
     return await prisma.contact.findFirst();
   };

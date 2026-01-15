@@ -1,9 +1,12 @@
 import { updateContactInfo } from "@/app/(dashboard)/dashboard/contact/_actions";
 import { prisma } from "@/lib/prisma";
 import ContactPageClient from "@/modules/dashboard/contact/main";
+import { cacheTag } from "next/cache";
 import React from "react";
 
 const ContactPage = async () => {
+  "use cache";
+  cacheTag("contact");
   const getContactDetail = async () => {
     return await prisma.contact.findFirst();
   };

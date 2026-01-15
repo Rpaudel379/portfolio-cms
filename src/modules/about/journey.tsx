@@ -1,8 +1,10 @@
 import { Timeline } from "@/components/ui/timeline";
 import { prisma } from "@/lib/prisma";
-import React from "react";
+import { cacheTag } from "next/cache";
 
 const Journey = async () => {
+  "use cache";
+  cacheTag("timeline");
   const getAllTimelines = async () => {
     return await prisma.timeline.findMany({
       orderBy: { order: "desc" },

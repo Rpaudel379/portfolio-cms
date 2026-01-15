@@ -1,8 +1,10 @@
 import { Badge } from "@/components/ui/badge";
 import { prisma } from "@/lib/prisma";
-import React from "react";
+import { cacheTag } from "next/cache";
 
 const Skills = async () => {
+  "use cache";
+  cacheTag("skills");
   const getAllSkills = async () => {
     return await prisma.skill.findMany({
       orderBy: { updatedAt: "desc" },

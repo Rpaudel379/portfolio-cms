@@ -3,10 +3,12 @@ import { prisma } from "@/lib/prisma";
 import { ProjectPageClient } from "@/modules/dashboard/projects/main";
 import { ProjectSchemaDTO } from "@/schema/project.schema";
 import { PlusIcon } from "lucide-react";
+import { cacheTag } from "next/cache";
 import Link from "next/link";
-import React from "react";
 
 const ProjectsPage = async () => {
+  "use cache";
+  cacheTag("projects");
   const getAllProjects = async () => {
     return await prisma.project.findMany({ orderBy: { createdAt: "asc" } });
   };

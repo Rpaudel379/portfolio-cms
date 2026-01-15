@@ -1,11 +1,7 @@
 import { ConfirmProvider } from "@/components/confirm-context";
 import SidebarDashboard from "@/components/dashboard/sidebar/sidebar-dashboard";
 import { SiteHeader } from "@/components/dashboard/sidebar/site-header";
-import {
-  SidebarInset,
-  SidebarProvider,
-  SidebarTrigger,
-} from "@/components/ui/sidebar";
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { ClerkProvider } from "@clerk/nextjs";
 import type { Metadata } from "next";
 import { cookies } from "next/headers";

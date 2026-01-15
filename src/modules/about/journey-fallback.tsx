@@ -1,5 +1,3 @@
-import React from "react";
-
 export const JourneyLoading = () => {
-  return <div>JourneyLoading</div>;
+  return <div className=" text-center text-xl">loading my timeline ...</div>;
 };

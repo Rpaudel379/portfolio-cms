@@ -1,5 +1,3 @@
-export const dynamic = "force-static";
-
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -10,7 +8,7 @@ import { SkillsLoading } from "@/modules/about/skills-fallback";
 import { IconBrandGithub, IconBrandLinkedin } from "@tabler/icons-react";
 import { Download, Mail } from "lucide-react";
 import Link from "next/link";
-import React, { Suspense } from "react";
+import { Suspense } from "react";
 
 const AboutPage = () => {
   return (

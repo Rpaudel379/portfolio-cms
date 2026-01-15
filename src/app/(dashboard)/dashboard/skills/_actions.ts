@@ -11,8 +11,8 @@ import { prisma } from "@/lib/prisma";
 import { ServerActionState } from "@/types/common.types";
 import { SaveSkill } from "@/types/skill.types";
 import { handleZodErrors } from "@/utils/zod-error";
-import { revalidatePath } from "next/cache";
-import z, { ZodError } from "zod";
+import { updateTag } from "next/cache";
+import { ZodError } from "zod";
 import { Prisma } from "@prisma/client";
 import { handlePrismaErrors } from "@/utils/prisma-error";
 
@@ -37,8 +37,7 @@ export const saveSkill = async (
       });
     }
 
-    revalidatePath("/about");
-    revalidatePath("/dashboard/skills");
+    updateTag("skills");
     return {
       status: "success",
       message: `Skill ${isNew ? "Created" : "Updated"}`,
@@ -78,9 +77,7 @@ export const deleteSkill = async (
 
     await prisma.skill.delete({ where: { id: id } });
 
-    revalidatePath("/about");
-    revalidatePath("/dashboard/skills");
-
+    updateTag("skills");
     return {
       status: "success",
       message: "Skill Deleted",
