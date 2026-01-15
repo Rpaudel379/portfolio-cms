@@ -5,9 +5,13 @@ import {
 import SkillsPageClient from "@/modules/dashboard/skills/main";
 import { prisma } from "@/lib/prisma";
 import React from "react";
+import { cacheTag } from "next/cache";
 
 const SkillsPage = async () => {
   const getAllSkills = async () => {
+    "use cache";
+    cacheTag("skills");
+
     return await prisma.skill.findMany({ orderBy: { updatedAt: "desc" } });
   };
 

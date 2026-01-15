@@ -11,7 +11,7 @@ import { ServerActionState } from "@/types/common.types";
 import { handlePrismaErrors } from "@/utils/prisma-error";
 import { handleZodErrors } from "@/utils/zod-error";
 import { Prisma } from "@prisma/client";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { resolve } from "path";
 import { ZodError } from "zod";
 
@@ -37,8 +37,7 @@ export const saveTimeline = async (
       });
     }
 
-    revalidatePath("/about");
-    revalidatePath("/dashboard/timeline");
+    updateTag("timeline");
 
     return {
       status: "success",
@@ -87,7 +86,7 @@ export const bulkUpdate = async (
   orderedTimeline: (TimelineSchemaDTO & { order: number })[]
 ) => {
   try {
-    const timeline = await prisma.$transaction(
+    await prisma.$transaction(
       orderedTimeline.map((timeline) =>
         prisma.timeline.update({
           where: { id: timeline.id },
@@ -96,8 +95,7 @@ export const bulkUpdate = async (
       )
     );
 
-    revalidatePath("/about");
-    revalidatePath("/dashboard/timeline");
+    updateTag("timeline");
   } catch (error) {
     let messageResponse = "Something went wrong";
     let errorResponse = null;
@@ -127,8 +125,7 @@ export const deleteTimeline = async (
     const id = idSchema.parse(uuid);
     await prisma.timeline.delete({ where: { id: id } });
 
-    revalidatePath("/dashboard/timeline");
-    revalidatePath("/about");
+    updateTag("timeline");
 
     return {
       status: "success",

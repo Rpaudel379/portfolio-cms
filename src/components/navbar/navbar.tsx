@@ -3,7 +3,7 @@
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Code } from "lucide-react";
 import { DesktopNav } from "@/components/navbar/desktop-nav";
 import { MobileNav } from "@/components/navbar/mobile-nav";

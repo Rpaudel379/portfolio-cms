@@ -2,7 +2,6 @@ import { createClient } from "@/lib/supabase/server";
 
 import { ResumePageClient } from "@/modules/dashboard/resume/main";
 import { notFound } from "next/navigation";
-import React from "react";
 
 const ResumePage = async () => {
   const supabase = await createClient();

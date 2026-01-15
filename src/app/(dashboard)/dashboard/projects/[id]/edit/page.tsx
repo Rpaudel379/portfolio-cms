@@ -6,7 +6,6 @@ import { ProjectSchemaDTO } from "@/schema/project.schema";
 import { ArrowLeftIcon } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import React from "react";
 
 const EditProject = async ({ params }: { params: Promise<{ id: string }> }) => {
   const id = (await params).id;

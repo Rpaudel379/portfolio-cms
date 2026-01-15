@@ -1,12 +1,13 @@
-export const dynamic = "force-static"; // 👈 ensures static generation
-
 import { prisma } from "@/lib/prisma";
 import ProjectPageClient from "@/modules/projects/components/main";
 import { ProjectSchemaDTO } from "@/schema/project.schema";
+import { cacheTag } from "next/cache";
 import { Suspense } from "react";
 
 const ProjectPage = async () => {
   const getAllProjects = async () => {
+    "use cache";
+    cacheTag("projects");
     return await prisma.project.findMany({ orderBy: { createdAt: "asc" } });
   };
 

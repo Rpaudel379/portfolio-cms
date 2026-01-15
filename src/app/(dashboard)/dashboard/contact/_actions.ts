@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { ServerActionState } from "@/types/common.types";
 import { handleZodErrors } from "@/utils/zod-error";
 import { Prisma } from "@prisma/client";
-import { revalidatePath } from "next/cache";
+import { updateTag } from "next/cache";
 import { ZodError } from "zod";
 
 export const updateContactInfo = async (
@@ -19,8 +19,7 @@ export const updateContactInfo = async (
       data: contactInfo,
     });
 
-    revalidatePath("/contact");
-    revalidatePath("/dashboard/contact");
+    updateTag("contact");
     return {
       status: "success",
       message: "Contact Info updated",

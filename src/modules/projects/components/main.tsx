@@ -111,7 +111,7 @@ const ProjectPageClient = ({ projects }: Props) => {
     });
 
     return sorted;
-  }, [searchQuery, filterCategory, sortBy]);
+  }, [projects, searchQuery, filterCategory, sortBy]);
 
   return (
     <div>

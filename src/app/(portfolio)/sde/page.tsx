@@ -1,5 +1,3 @@
-export const dynamic = "force-static";
-
 import { getPublicUrl } from "@/utils/supabase/file";
 import { redirect } from "next/navigation";
 

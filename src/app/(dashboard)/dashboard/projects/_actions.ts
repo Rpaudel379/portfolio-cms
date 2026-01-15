@@ -18,7 +18,7 @@ import {
 } from "@/utils/supabase/file";
 import { handleZodErrors } from "@/utils/zod-error";
 import { Prisma } from "@prisma/client";
-import { revalidatePath } from "next/cache";
+import { updateTag } from "next/cache";
 import { ZodError } from "zod";
 
 export const saveProject = async (
@@ -113,9 +113,7 @@ export const saveProject = async (
       });
     }
 
-    revalidatePath("/projects");
-    revalidatePath("/dashboard/projects");
-
+    updateTag("projects");
     return {
       status: "success",
       message: `Project ${isNew ? "Created" : "Updated"}`,
@@ -171,8 +169,7 @@ export const deleteProject = async (
       await deleteObjectFromBucket(project.imagePath, "thumbnail_bucket");
     }
 
-    revalidatePath("/projects");
-    revalidatePath("/dashboard/projects");
+    updateTag("projects");
 
     return {
       status: "success",

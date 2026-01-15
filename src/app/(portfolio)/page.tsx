@@ -1,5 +1,4 @@
 import { AnimatedBackground } from "@/components/animations/animated-background";
-// import { FloatingElements } from "@/components/animations/floating-elements";
 import { TypewriterText } from "@/components/animations/typewritter-text";
 import { BackgroundLines } from "@/components/ui/background-lines";
 import { Badge } from "@/components/ui/badge";
@@ -7,9 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Cover } from "@/components/ui/cover";
 import { IconBrandGithub, IconBrandLinkedin } from "@tabler/icons-react";
-import { ArrowRight, Code, Database, Download, Mail, Star } from "lucide-react";
+import { ArrowRight, Code, Download, Mail, Star } from "lucide-react";
 import Link from "next/link";
-import React from "react";
+import { Suspense } from "react";
 
 const HomePage = () => {
   const roles = [
@@ -45,9 +44,11 @@ const HomePage = () => {
                 </p>
               </div>
 
-              <BackgroundLines className="pointer-events-none">
-                {" "}
-              </BackgroundLines>
+              <Suspense>
+                <BackgroundLines className="pointer-events-none">
+                  {" "}
+                </BackgroundLines>
+              </Suspense>
 
               {/* Name - The Star of the Show */}
               <div className="space-y-4">

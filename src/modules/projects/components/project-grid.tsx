@@ -41,7 +41,7 @@ const ProjectGrid = ({
             variant="outline"
             onClick={() => {
               setSearchQuery("");
-              setFilterCategory("All");
+              setFilterCategory("all");
             }}
           >
             Clear all filters
