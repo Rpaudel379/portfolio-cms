@@ -12,9 +12,8 @@ import {
   SidebarGroup,
   SidebarGroupContent,
 } from "@/components/ui/sidebar";
-import { usePathname } from "next/navigation";
-import React from "react";
-import { IconUser, IconDashboard, IconLogout } from "@tabler/icons-react";
+import { usePathname, useRouter } from "next/navigation";
+import { IconUser, IconLogout } from "@tabler/icons-react";
 import Link from "next/link";
 import {
   contentItems,
@@ -23,10 +22,21 @@ import {
 } from "@/app/(dashboard)/_const";
 import { ThemeToggle } from "@/components/themes/theme-toggle";
 import { Code } from "lucide-react";
-import { SignOutButton } from "@clerk/nextjs";
+import { authClient } from "@/lib/auth-client";
 
 const SidebarDashboard = () => {
   const pathname = usePathname();
+  const router = useRouter();
+
+  const handleSignout = async () => {
+    authClient.signOut({
+      fetchOptions: {
+        onSuccess: () => {
+          router.push("/");
+        },
+      },
+    });
+  };
 
   return (
     <Sidebar collapsible="icon" variant="inset">
@@ -119,12 +129,10 @@ const SidebarDashboard = () => {
           </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton asChild className="cursor-pointer">
-              <SignOutButton>
-                <div>
-                  <IconLogout />
-                  signout
-                </div>
-              </SignOutButton>
+              <div onClick={handleSignout}>
+                <IconLogout />
+                signout
+              </div>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

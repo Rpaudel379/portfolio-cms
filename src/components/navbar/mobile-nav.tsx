@@ -58,7 +58,6 @@ export const MobileNav = ({ items, pathname }: NavbarItems) => {
             <div className="flex flex-col space-y-3">
               {items.map((item) => (
                 <Link
-                  prefetch={false}
                   key={item.name}
                   href={item.href}
                   onClick={() => setIsOpen(false)}
@@ -66,7 +65,7 @@ export const MobileNav = ({ items, pathname }: NavbarItems) => {
                     "flex items-center px-4 py-3 text-lg font-medium rounded-xl transition-all duration-300",
                     pathname === item.href
                       ? "text-foreground bg-primary/10 border border-primary/20"
-                      : "text-foreground/80 hover:text-foreground hover:bg-muted/50"
+                      : "text-foreground/80 hover:text-foreground hover:bg-muted/50",
                   )}
                 >
                   {item.name}

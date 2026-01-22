@@ -11,12 +11,11 @@ export const DesktopNav = ({ items, pathname }: NavbarItems) => {
           <Link
             key={item.name}
             href={item.href}
-            prefetch={false}
             className={cn(
               "relative px-4 py-2 text-sm font-medium rounded-full transition-all duration-300 hover:text-foreground",
               pathname === item.href
                 ? "text-foreground bg-background shadow-sm"
-                : "text-foreground/70 hover:text-foreground hover:bg-background/50"
+                : "text-foreground/70 hover:text-foreground hover:bg-background/50",
             )}
           >
             {item.name}

@@ -42,7 +42,7 @@ export const getStatusDot = (status: string) => {
 
 type FormatDateOptions = {
   fromNow?: boolean;
-  format?: "string";
+  format?: string;
 };
 
 export const formatDate = (date: string | Date, options: FormatDateOptions) => {
@@ -60,7 +60,7 @@ export const formatDate = (date: string | Date, options: FormatDateOptions) => {
 export const downloadBlob = (
   data: BlobPart,
   fileName: string,
-  type = "application/octet-stream"
+  type = "application/octet-stream",
 ) => {
   const blob = new Blob([data], { type });
   const url = window.URL.createObjectURL(blob);
