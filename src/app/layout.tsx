@@ -49,5 +49,11 @@ export default function RootLayout({
 }
 
 export const FallbackLoading = () => {
-  return <div className="text-center text-xl">loading...</div>;
+  return (
+    <div className="flex items-center justify-center h-screen">
+      <p className="tracking-widest text-2xl md:text-5xl text-gray-500 animate-pulse">
+        LOADING
+      </p>
+    </div>
+  );
 };
