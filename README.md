@@ -7,7 +7,7 @@ Instead of manually editing code and running `git commit && git push` every time
 
 ## ✨ Features
 
-- 🔑 **Authentication with Clerk** – secure admin dashboard
+- 🔑 **Authentication with Better Auth** – secure admin dashboard
 - 🖥️ **Two Sections**
   - **Client-facing portfolio** → About Me, Projects, Skills, Contact Info, Resume
   - **Admin dashboard** → Manage all portfolio content dynamically
@@ -18,7 +18,6 @@ Instead of manually editing code and running `git commit && git push` every time
   - Supabase Storage Buckets for resumes & thumbnails
 - ⚡ **Prisma ORM** for type-safe DB access
 - 🎨 **UI & Styling**
-
   - Tailwind CSS + shadcn/ui
   - Animations with [react-bits](https://reactbits.dev/) & [aceternity](https://ui.aceternity.com/)
 
@@ -31,7 +30,7 @@ Instead of manually editing code and running `git commit && git push` every time
 
 - **Frontend:** Next.js, React, Tailwind CSS, shadcn/ui
 - **Backend:** Next.js (server components & server actions)
-- **Auth:** Clerk
+- **Auth:** Better Auth
 - **Database:** Supabase PostgreSQL + Prisma ORM
 - **Storage:** Supabase Buckets
 - **Animations:** react-bits, aceternity
@@ -73,8 +72,8 @@ DIRECT_URL="<url>/postgres"
 NEXT_PUBLIC_SUPABASE_URL="<your supabase base url>"
 NEXT_PUBLIC_SUPABASE_ANON_KEY="<get from supabase dashboard>"
 
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY="<get from clerk>"
-CLERK_SECRET_KEY="<get from clerk>"
+BETTER_AUTH_SECRET="your secret key"
+BETTER_AUTH_URL="Base URL of your frontend"
 ```
 
 ### 4️⃣ Run database migrations:
@@ -142,9 +141,6 @@ bun run start
 
 - 🔧 **Code Refactoring & Consistency**  
   Improve code quality by refactoring existing modules and enforcing consistent patterns, naming conventions, and folder structures.
-
-- 🔐 **Authentication Overhaul**  
-  Replace Clerk with a faster, self-hosted authentication system, ensuring credentials are stored securely in our own database while reducing dependency on third-party services.
 
 - ⚡ **Performance Optimization**  
   Implement React caching, server-side caching, or edge functions to significantly improve load times and responsiveness in production.

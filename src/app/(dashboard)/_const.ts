@@ -65,9 +65,9 @@ export const settingsItems = [
 ];
 
 export const typeIcons = {
-  EDUCATION: "🎓", // Graduation cap
-  WORK: "💼", // Briefcase
+  EDUCATION: "🎓",
+  WORK: "💼",
   PROJECT: "🚀",
-  ACHIEVEMENT: "🏆", // Trophy
-  FREELANCE: "🖥️", // Laptop (symbolizing remote work)
+  ACHIEVEMENT: "🏆",
+  FREELANCE: "🖥️",
 };
