@@ -3,9 +3,9 @@ import { prisma } from "@/lib/prisma";
 import { cacheTag } from "next/cache";
 
 const Skills = async () => {
-  "use cache";
-  cacheTag("skills");
   const getAllSkills = async () => {
+    "use cache";
+    cacheTag("skills");
     return await prisma.skill.findMany({
       orderBy: { updatedAt: "desc" },
       where: { visible: true },

@@ -4,9 +4,9 @@ import { ContactSchemaDTO } from "@/schema/contact.schema";
 import { cacheTag } from "next/cache";
 
 export default async function Contact() {
-  "use cache";
-  cacheTag("contact");
   const getContactDetail = async () => {
+    "use cache";
+    cacheTag("contact");
     return await prisma.contact.findFirst();
   };
 

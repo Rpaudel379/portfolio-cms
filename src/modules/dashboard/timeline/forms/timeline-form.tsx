@@ -1,4 +1,3 @@
-import React, { useActionState, useEffect } from "react";
 import {
   Card,
   CardContent,
@@ -7,16 +6,11 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { serverActionState, ServerActionState } from "@/types/common.types";
-import {
-  timelineInitialState,
-  timelineTypeEnums,
-} from "@/modules/dashboard/timeline/state";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
-  TimelineSchema,
   timelineSchema,
+  timelineSchemaDTO,
   TimelineSchemaDTO,
 } from "@/schema/timeline.schema";
 import {
@@ -34,51 +28,54 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ChevronDownIcon } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { useEnhancedAction } from "@/hooks/use-enhanced-action";
+import { saveTimelineAction } from "@/app/(dashboard)/dashboard/timeline/_actions";
+import { TimelineTypeEnum } from "@/const";
+import { Loader2 } from "lucide-react";
 
 type Props = {
   timeline: TimelineSchemaDTO | null;
-  onFormCancel: () => void;
-  saveTimeline: (
-    prevState: any,
-    data: FormData
-  ) => Promise<ServerActionState<void>>;
+  onFormClose: () => void;
 };
 
-export const TimelineForm = ({
-  timeline,
-  saveTimeline,
-  onFormCancel,
-}: Props) => {
-  const stateValues = timeline ? { values: timeline } : timelineInitialState;
-
-  const [state, action, isPending] = useActionState(saveTimeline, {
-    ...serverActionState,
-    ...stateValues,
+export const TimelineForm = ({ timeline, onFormClose }: Props) => {
+  const form = useForm({
+    resolver: zodResolver(timeline ? timelineSchemaDTO : timelineSchema),
+    defaultValues: timeline
+      ? timeline
+      : {
+          year: new Date().getFullYear().toString(),
+          title: "",
+          company: "",
+          description: "",
+          work_type: TimelineTypeEnum.WORK,
+          skills: "",
+        },
   });
 
-  const form = useForm<TimelineSchema | TimelineSchemaDTO>({
-    resolver: zodResolver(timelineSchema),
-    defaultValues: state.values as TimelineSchema | TimelineSchemaDTO,
-    errors: state.errors!,
-    mode: "onBlur",
-  });
+  const isSubmitting = form.formState.isSubmitting;
 
-  useEffect(() => {
-    if (state.status) {
-      if (state.status === "success") {
-        toast.success(state.message);
-        setTimeout(() => {
-          onFormCancel();
-        }, 1000);
+  const { execute: save } = useEnhancedAction(saveTimelineAction, {
+    onSuccess(message) {
+      toast.success(message);
+      onFormClose();
+    },
+    onError(errors) {
+      console.log(errors);
+      if (errors?.fieldError) {
+        Object.entries(errors.fieldError).map(([field, message]) => {
+          form.setError(field as never, {
+            message: message,
+          });
+        });
       } else {
-        toast.error(state.message);
+        toast.error(errors?.message);
       }
-    }
-  }, [state]);
+    },
+  });
 
   return (
     <div>
@@ -89,15 +86,7 @@ export const TimelineForm = ({
         </CardHeader>
         <CardContent>
           <Form {...form}>
-            <form action={action} className="space-y-5">
-              {timeline && (
-                <>
-                  <input type="hidden" {...form.register("id")} />
-                  <input type="hidden" {...form.register("createdAt")} />
-                  <input type="hidden" {...form.register("updatedAt")} />
-                </>
-              )}
-
+            <form className="space-y-5" onSubmit={form.handleSubmit(save)}>
               <div className="grid md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <FormField
@@ -107,7 +96,12 @@ export const TimelineForm = ({
                       <FormItem>
                         <FormLabel>Year *</FormLabel>
                         <FormControl>
-                          <Input placeholder="" {...field} className="w-fit" />
+                          <Input
+                            {...field}
+                            placeholder="XXXX"
+                            disabled={isSubmitting}
+                            className="w-fit"
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -132,18 +126,13 @@ export const TimelineForm = ({
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {timelineTypeEnums.map((type) => (
+                            {Object.values(TimelineTypeEnum).map((type) => (
                               <SelectItem value={type} key={type}>
-                                <span className="capitalize">{type}</span>
+                                <span>{type}</span>
                               </SelectItem>
                             ))}
                           </SelectContent>
-                        </Select>{" "}
-                        <input
-                          type="hidden"
-                          name={field.name}
-                          value={field.value ?? ""}
-                        />
+                        </Select>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -160,10 +149,12 @@ export const TimelineForm = ({
                       <FormLabel>Title *</FormLabel>
                       <FormControl>
                         <Input
-                          placeholder="Senior Full-Stack Developer"
                           {...field}
+                          placeholder="Senior Full-Stack Developer"
+                          disabled={isSubmitting}
                         />
                       </FormControl>
+                      <FormMessage />
                     </FormItem>
                   )}
                 />
@@ -177,11 +168,13 @@ export const TimelineForm = ({
                       <FormLabel>Company</FormLabel>
                       <FormControl>
                         <Input
-                          placeholder="TechCorp Solutions"
                           {...field}
-                          value={field.value!}
+                          value={field.value ?? ""}
+                          placeholder="TechCorp Solutions"
+                          disabled={isSubmitting}
                         />
                       </FormControl>
+                      <FormMessage />
                     </FormItem>
                   )}
                 />
@@ -195,11 +188,13 @@ export const TimelineForm = ({
                       <FormLabel>Description *</FormLabel>
                       <FormControl>
                         <Textarea
-                          placeholder="Brief description of your role and achievements..."
                           {...field}
                           rows={10}
+                          placeholder="Brief description of your role and achievements..."
+                          disabled={isSubmitting}
                         />
                       </FormControl>
+                      <FormMessage />
                     </FormItem>
                   )}
                 />
@@ -213,24 +208,28 @@ export const TimelineForm = ({
                       <FormLabel>Skills</FormLabel>
                       <FormControl>
                         <Input
-                          placeholder="Enter comma separated skills  node.js, php"
                           {...field}
-                          value={field.value!}
+                          value={field.value ?? ""}
+                          placeholder="Enter comma separated skills  node.js, php"
+                          disabled={isSubmitting}
                         />
                       </FormControl>
+                      <FormMessage />
                     </FormItem>
                   )}
                 />
               </div>
               <div className="flex gap-2">
-                <Button type="submit" disabled={isPending}>
-                  Add Timeline
+                <Button type="submit" disabled={isSubmitting}>
+                  {isSubmitting && <Loader2 className="animate-spin" />}
+                  {timeline ? "Update" : "Create"}
                 </Button>
 
                 <Button
                   variant="outline"
                   type="button"
-                  onClick={() => onFormCancel()}
+                  onClick={onFormClose}
+                  disabled={isSubmitting}
                 >
                   Cancel
                 </Button>

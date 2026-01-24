@@ -1,6 +1,6 @@
 "use client";
 
-import { saveProject } from "@/app/(dashboard)/dashboard/projects/_actions";
+import { saveProjectAction } from "@/app/(dashboard)/dashboard/projects/_actions";
 import {
   Form,
   FormControl,
@@ -16,9 +16,7 @@ import {
   projectSchemaDTO,
   ProjectSchemaDTO,
 } from "@/schema/project.schema";
-import { ServerActionState, serverActionState } from "@/types/common.types";
 import { zodResolver } from "@hookform/resolvers/zod";
-import React, { useActionState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import {
@@ -45,8 +43,7 @@ import {
 } from "@/components/ui/multi-select";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { SkillSchema, SkillSchemaDTO } from "@/schema/skill.schema";
-import { useCustomAction } from "@/hooks/use-custom-action";
+import { SkillSchemaDTO } from "@/schema/skill.schema";
 import { Links } from "@/modules/dashboard/projects/forms/links";
 import Technologies from "@/modules/dashboard/projects/forms/technologies";
 import { Thumbnail } from "@/modules/dashboard/projects/forms/thumbnail";
@@ -55,14 +52,15 @@ import { useRouter } from "next/navigation";
 import { CategoryEnum, StatusEmum } from "@/const";
 import Features from "@/modules/dashboard/projects/forms/features";
 import { Challenges } from "@/modules/dashboard/projects/forms/challenges";
+import { useEnhancedAction } from "@/hooks/use-enhanced-action";
+import { saveSkillAction } from "@/app/(dashboard)/dashboard/skills/_actions";
 
 type Props = {
-  project: ProjectSchemaDTO | null;
   tags: SkillSchemaDTO[] | null;
-  saveSkill: (data: SkillSchema) => Promise<ServerActionState<null>>;
+  project?: ProjectSchemaDTO;
 };
 
-const ProjectForm = ({ project, tags, saveSkill }: Props) => {
+const ProjectForm = ({ project, tags }: Props) => {
   const router = useRouter();
   const stateValues = project ? project : projectInitialState.values;
 
@@ -72,45 +70,74 @@ const ProjectForm = ({ project, tags, saveSkill }: Props) => {
     mode: "onSubmit",
   });
 
-  const { execute: saveTag, isLoading: isCreatingSkill } = useCustomAction(
-    saveSkill,
+  const isSubmitting = form.formState.isSubmitting;
+
+  const { execute: saveTag, isLoading: isCreatingSkill } = useEnhancedAction(
+    saveSkillAction,
     {
+      onLoading(loading) {
+        if (loading) {
+          toast.loading("creating tag");
+        }
+      },
       onSuccess(message) {
+        toast.dismiss();
         toast.success(message);
       },
       onError(message) {
-        toast.error(message);
+        toast.dismiss();
+        toast.error(message?.message);
       },
-    }
+    },
   );
 
-  const handleSubmit = async (data: ProjectSchemaDTO | ProjectSchema) => {
-    try {
-      const res = await saveProject(data);
-      if (res.status === "success") {
-        toast.success(res.message, {
-          description: "Redirecting to Projects page",
-        });
+  // const handleSubmit = async (data: ProjectSchemaDTO | ProjectSchema) => {
+  //   try {
+  //     const res = await saveProjectAction(data);
+  //     if (res.status === "success") {
+  //       toast.success(res.message, {
+  //         description: "Redirecting to Projects page",
+  //       });
 
-        setTimeout(() => {
-          router.push("/dashboard/projects");
-        }, 2000);
-      } else {
-        toast.error(res.message);
-        if (res.errors) {
-          Object.entries(res.errors).forEach(([field, message]) => {
-            form.setError(field as never, {
-              message: message[0],
-              type: "manual",
-            });
+  //       setTimeout(() => {
+  //         router.push("/dashboard/projects");
+  //       }, 2000);
+  //     } else {
+  //       toast.error(res.message);
+  //       if (res.errors) {
+  //         Object.entries(res.errors).forEach(([field, message]) => {
+  //           form.setError(field as never, {
+  //             message: message[0],
+  //             type: "manual",
+  //           });
+  //         });
+  //       }
+  //     }
+  //   } catch (error) {
+  //     console.log(error);
+  //     toast.error("Something went wrong");
+  //   }
+  // };
+
+  const { execute: handleSubmit } = useEnhancedAction(saveProjectAction, {
+    onSuccess(message) {
+      toast.success(message, { description: "Redirecting to Projects page" });
+      setTimeout(() => {
+        router.push("/dashboard/projects");
+      }, 1500);
+    },
+    onError(errors) {
+      if (errors?.fieldError) {
+        Object.entries(errors.fieldError).forEach(([field, message]) => {
+          form.setError(field as never, {
+            message: message,
           });
-        }
+        });
+      } else {
+        toast.error(errors?.message);
       }
-    } catch (error) {
-      console.log(error);
-      toast.error("Something went wrong");
-    }
-  };
+    },
+  });
 
   return (
     <Form {...form}>

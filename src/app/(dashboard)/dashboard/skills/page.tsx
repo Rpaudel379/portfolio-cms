@@ -1,10 +1,5 @@
-import {
-  saveSkill,
-  deleteSkill,
-} from "@/app/(dashboard)/dashboard/skills/_actions";
-import SkillsPageClient from "@/modules/dashboard/skills/main";
+import SkillsPageClient from "@/modules/dashboard/skills";
 import { prisma } from "@/lib/prisma";
-import React from "react";
 import { cacheTag } from "next/cache";
 
 const SkillsPage = async () => {
@@ -25,11 +20,7 @@ const SkillsPage = async () => {
         </p>
       </div>
 
-      <SkillsPageClient
-        skills={skills}
-        saveSkill={saveSkill}
-        deleteSkill={deleteSkill}
-      />
+      <SkillsPageClient skills={skills} />
     </div>
   );
 };

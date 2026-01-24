@@ -3,7 +3,7 @@ import z from "zod";
 
 export const projectStatusEnum = z.enum(
   ["LIVE", "DEVELOPMENT", "COMPLETE", "INPROGRESS", "MAINTENANCE", "ARCHIVED"],
-  { error: "valid status is required" }
+  { error: "This status is invalid" },
 );
 
 export type ProjectStatusEnum = z.infer<typeof projectStatusEnum>;
@@ -21,7 +21,7 @@ export type ProjectCategoryEnum = z.infer<typeof projectCategoryEnum>;
 export const projectSchema = z.object(
   {
     title: z
-      .string()
+      .string({ error: "Title is required" })
       .min(3, "Title is very small")
       .max(90, "Title is too long"),
     description: z
@@ -32,9 +32,11 @@ export const projectSchema = z.object(
     category: projectCategoryEnum,
     status: projectStatusEnum,
     year: z
-      .string({ error: "valid year is required" })
+      .string({ error: "Year is required" })
+      .min(4, "valid date is required")
       .max(4, "valid date is required")
-      .default("XXXX"),
+      .optional()
+      .default(() => new Date().getFullYear().toString()),
     github: z.string().nullish(),
     demo: z.string().nullish(),
     features: z.array(z.string()),
@@ -42,7 +44,7 @@ export const projectSchema = z.object(
     technologies: z.record(z.string(), z.array(z.string())).nullish(),
     imageFile: z.file().nullish(),
   },
-  { error: "Valid Project data is required" }
+  { error: "Valid Project data is required" },
 );
 
 export type ProjectSchema = z.infer<typeof projectSchema>;

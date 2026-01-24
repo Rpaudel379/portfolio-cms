@@ -1,14 +1,10 @@
-import { saveSkill } from "@/app/(dashboard)/dashboard/skills/_actions";
 import { Button } from "@/components/ui/button";
 import { prisma } from "@/lib/prisma";
 import ProjectForm from "@/modules/dashboard/projects/forms/project-form";
 import { ArrowLeftIcon } from "lucide-react";
 import Link from "next/link";
-import React from "react";
 
-type Props = {};
-
-const NewProject = async (props: Props) => {
+const NewProject = async () => {
   const getAllSkills = async () => {
     return await prisma.skill.findMany({ orderBy: { updatedAt: "desc" } });
   };
@@ -32,7 +28,7 @@ const NewProject = async (props: Props) => {
         </div>
       </div>
 
-      <ProjectForm project={null} tags={skills} saveSkill={saveSkill} />
+      <ProjectForm tags={skills} />
     </div>
   );
 };

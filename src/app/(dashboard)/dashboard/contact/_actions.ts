@@ -1,23 +1,33 @@
 "use server";
 
-import { ContactSchemaDTO, contactSchemaDTO } from "@/schema/contact.schema";
+import {
+  contactSchema,
+  ContactSchema,
+  ContactSchemaDTO,
+  contactSchemaDTO,
+} from "@/schema/contact.schema";
 import { prisma } from "@/lib/prisma";
 import { ServerActionState } from "@/types/common.types";
-import { handleZodErrors } from "@/utils/zod-error";
-import { Prisma } from "@prisma/client";
 import { updateTag } from "next/cache";
-import { ZodError } from "zod";
+import { handleErrorResponse } from "@/utils/error-response";
 
-export const updateContactInfo = async (
-  data: ContactSchemaDTO
+export const updateContactInfoAction = async (
+  data: ContactSchema | ContactSchemaDTO,
 ): Promise<ServerActionState<null>> => {
   try {
-    const contactInfo = contactSchemaDTO.parse(data);
-
-    await prisma.contact.update({
-      where: { id: contactInfo.id },
-      data: contactInfo,
-    });
+    const isNew: boolean = !("id" in data);
+    if (isNew) {
+      const contact = contactSchema.parse(data);
+      await prisma.contact.create({
+        data: contact,
+      });
+    } else {
+      const contact = contactSchemaDTO.parse(data);
+      await prisma.contact.update({
+        where: { id: contact.id },
+        data: contact,
+      });
+    }
 
     updateTag("contact");
     return {
@@ -27,33 +37,6 @@ export const updateContactInfo = async (
       errors: null,
     };
   } catch (error) {
-    let messageResponse = "Something went wrong";
-    let errorResponse = null;
-
-    if (error instanceof ZodError) {
-      const err = handleZodErrors(error, "general") as string;
-      messageResponse = err;
-    }
-
-    console.log("update contact error");
-    console.dir(error, { depth: null });
-
-    if (error instanceof Prisma.PrismaClientKnownRequestError) {
-      console.dir(error, { depth: null });
-      if (error.code === "P2002") {
-        messageResponse = "Skill already exists";
-      } else if (error.code === "P2023") {
-        messageResponse = "The skill id is not correct";
-      } else {
-        messageResponse = "Database validation failed";
-      }
-    }
-
-    return {
-      status: "failed",
-      message: messageResponse,
-      errors: errorResponse,
-      data: null,
-    };
+    return handleErrorResponse(error);
   }
 };

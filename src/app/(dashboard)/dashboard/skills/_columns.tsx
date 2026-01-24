@@ -25,7 +25,7 @@ export const getSkillColumns = ({
   onEdit,
   onDelete,
   onVisibilityChange,
-}: ColumnProps): ColumnDef<SkillSchemaDTO, any>[] => {
+}: ColumnProps): ColumnDef<SkillSchemaDTO, never>[] => {
   const columns = [
     columnHelper.accessor("name", {
       header: ({ column }) => {

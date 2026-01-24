@@ -1,28 +1,26 @@
 "use client";
 
-import FilterSearch from "@/modules/dashboard/projects/filter-search";
-import ProjectList from "@/modules/dashboard/projects/project-list";
-import { ProjectStats } from "@/modules/dashboard/projects/project-stats";
+import FilterSearch from "@/modules/dashboard/projects/components/filter-search";
+import ProjectList from "@/modules/dashboard/projects/components/project-list";
+import { ProjectStats } from "@/modules/dashboard/projects/components/project-stats";
 import {
   ProjectCategoryEnum,
   ProjectSchemaDTO,
   ProjectStatusEnum,
 } from "@/schema/project.schema";
-import { useRouter } from "next/navigation";
-import React, { Dispatch, SetStateAction, useMemo, useState } from "react";
+import { Dispatch, SetStateAction, useMemo, useState } from "react";
 
 type Props = {
   projects: ProjectSchemaDTO[];
 };
 
 export const ProjectPageClient = ({ projects }: Props) => {
-  const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const [filterCategory, setFilterCategory] = useState<
     ProjectCategoryEnum | "all"
   >("all");
   const [filterStatus, setFilterStatus] = useState<ProjectStatusEnum | "all">(
-    "all"
+    "all",
   );
   const [sortBy, setSortBy] = useState<"newest" | "oldest" | "title">("newest");
 
@@ -41,14 +39,14 @@ export const ProjectPageClient = ({ projects }: Props) => {
           project.category.toLowerCase().includes(query) ||
           Object.values(project.technologies || {})
             .flat()
-            .some((tech) => tech.toLowerCase().includes(query))
+            .some((tech) => tech.toLowerCase().includes(query)),
       );
     }
 
     // category
     if (filterCategory !== "all") {
       filtered = filtered.filter(
-        (project) => project.category === filterCategory
+        (project) => project.category === filterCategory,
       );
     }
 
@@ -78,14 +76,9 @@ export const ProjectPageClient = ({ projects }: Props) => {
     return filtered;
   }, [projects, searchQuery, filterCategory, filterStatus, sortBy]);
 
-  const stats = {
-    total: projects.length,
-    live: projects.filter((p) => p.status === "LIVE").length,
-    development: projects.filter((p) => p.status === "DEVELOPMENT").length,
-  };
   return (
     <div className="space-y-6">
-      <ProjectStats stats={stats} />
+      <ProjectStats projects={projects} />
 
       <FilterSearch
         searchQuery={searchQuery}

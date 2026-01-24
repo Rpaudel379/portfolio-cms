@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import ProjectPageClient from "@/modules/projects/components/main";
+import ProjectPageClient from "@/modules/projects";
 import { ProjectSchemaDTO } from "@/schema/project.schema";
 import { cacheTag } from "next/cache";
 import { Suspense } from "react";

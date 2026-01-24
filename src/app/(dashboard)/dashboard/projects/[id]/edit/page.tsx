@@ -1,4 +1,3 @@
-import { saveSkill } from "@/app/(dashboard)/dashboard/skills/_actions";
 import { Button } from "@/components/ui/button";
 import { prisma } from "@/lib/prisma";
 import ProjectForm from "@/modules/dashboard/projects/forms/project-form";
@@ -50,11 +49,7 @@ const EditProject = async ({ params }: { params: Promise<{ id: string }> }) => {
         </div>
       </div>
 
-      <ProjectForm
-        project={project as ProjectSchemaDTO}
-        tags={skills}
-        saveSkill={saveSkill}
-      />
+      <ProjectForm project={project as ProjectSchemaDTO} tags={skills} />
     </div>
   );
 };

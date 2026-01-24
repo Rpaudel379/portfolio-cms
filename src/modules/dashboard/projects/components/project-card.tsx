@@ -1,10 +1,10 @@
+import { deleteProjectAction } from "@/app/(dashboard)/dashboard/projects/_actions";
+import { useConfirm } from "@/components/confirm-context";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { useConfirmModal } from "@/hooks/use-confirm";
-import { useCustomAction } from "@/hooks/use-custom-action";
+import { useEnhancedAction } from "@/hooks/use-enhanced-action";
 import { ProjectSchemaDTO } from "@/schema/project.schema";
-import { ServerActionState } from "@/types/common.types";
 import {
   ExternalLinkIcon,
   GithubIcon,
@@ -13,28 +13,37 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import React from "react";
 import { toast } from "sonner";
 
 type Props = {
   project: ProjectSchemaDTO;
-  deleteProject: (data: string) => Promise<ServerActionState<void>>;
 };
 
-const ProjectCard = ({ project, deleteProject }: Props) => {
-  const { execute: removeProject, isLoading: isDeleting } = useCustomAction(
-    deleteProject,
-    {
-      onSuccess(message) {
-        toast.success(message);
-      },
-      onError(message) {
-        toast.error(message);
-      },
-    }
-  );
+const ProjectCard = ({ project }: Props) => {
+  const { execute: deleteProject } = useEnhancedAction(deleteProjectAction, {
+    onSuccess(message) {
+      toast.success(message);
+    },
+    onError(error) {
+      toast.error(error?.message);
+    },
+  });
 
-  const { confirmAction } = useConfirmModal();
+  const confirm = useConfirm();
+
+  const handleDelete = async () => {
+    await confirm({
+      title: "Delete this project?",
+      message:
+        "This action will delete this project information and will not be shown to the users",
+      confirmText: "Delete Now",
+      cancelText: "Dont Delete",
+      action: async () => {
+        await deleteProject(project.id);
+      },
+    });
+  };
+
   return (
     <Card>
       <CardContent className="p-6">
@@ -97,16 +106,7 @@ const ProjectCard = ({ project, deleteProject }: Props) => {
                     <PencilIcon className="h-4 w-4" />
                   </Link>
                 </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() =>
-                    confirmAction(
-                      () => removeProject(project.id),
-                      "Are you sure you want to delete this project"
-                    )
-                  }
-                >
+                <Button size="sm" variant="outline" onClick={handleDelete}>
                   <TrashIcon className="h-4 w-4" />
                 </Button>
               </div>
