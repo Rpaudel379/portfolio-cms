@@ -63,11 +63,3 @@ export const settingsItems = [
     icon: IconSettings,
   },
 ];
-
-export const typeIcons = {
-  EDUCATION: "🎓",
-  WORK: "💼",
-  PROJECT: "🚀",
-  ACHIEVEMENT: "🏆",
-  FREELANCE: "🖥️",
-};

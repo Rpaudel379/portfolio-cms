@@ -1,13 +1,11 @@
-import { updateContactInfo } from "@/app/(dashboard)/dashboard/contact/_actions";
 import { prisma } from "@/lib/prisma";
-import ContactPageClient from "@/modules/dashboard/contact/main";
+import ContactPageClient from "@/modules/dashboard/contact";
 import { cacheTag } from "next/cache";
-import React from "react";
 
 const ContactPage = async () => {
-  "use cache";
-  cacheTag("contact");
   const getContactDetail = async () => {
+    "use cache";
+    cacheTag("contact");
     return await prisma.contact.findFirst();
   };
 
@@ -24,10 +22,7 @@ const ContactPage = async () => {
         </p>
       </div>
 
-      <ContactPageClient
-        contactInfo={contact}
-        updateContactInfo={updateContactInfo}
-      />
+      <ContactPageClient contactInfo={contact} />
     </div>
   );
 };

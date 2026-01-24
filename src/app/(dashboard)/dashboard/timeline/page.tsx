@@ -1,6 +1,5 @@
-import { saveTimeline } from "@/app/(dashboard)/dashboard/timeline/_actions";
 import { prisma } from "@/lib/prisma";
-import TimelinePageClient from "@/modules/dashboard/timeline/main";
+import TimelinePageClient from "@/modules/dashboard/timeline";
 import { cacheTag } from "next/cache";
 
 const TimelinePage = async () => {
@@ -15,10 +14,7 @@ const TimelinePage = async () => {
   const timelines = await getAllTimelines();
   return (
     <>
-      <TimelinePageClient
-        timelineItems={timelines}
-        saveTimeline={saveTimeline}
-      />
+      <TimelinePageClient timelineItems={timelines} />
     </>
   );
 };

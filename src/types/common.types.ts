@@ -1,16 +1,21 @@
 export type ServerAction<TInput, TResult> = (
-  data: TInput
+  data: TInput,
 ) => Promise<ServerActionState<TResult>>;
+
+export type AppError = {
+  message: string;
+  fieldError: Record<string, string> | null;
+} | null;
 
 export type ServerActionState<T> = {
   status: "success" | "failed" | null;
   message: string;
-  data: T | null;
+  data?: T | null;
   values?: string | Record<string, string | string[] | Date | null | undefined>;
-  errors: Record<string, string | string[]> | null;
+  errors: AppError;
 };
 
-export interface UseCustomActionReturn<TInput> {
+export interface UseEnhancedActionReturn<TInput> {
   execute: (data: TInput) => Promise<void>;
   isLoading: boolean;
 }

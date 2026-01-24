@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React from "react";
 import {
   DndContext,
   closestCenter,
@@ -18,7 +18,7 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { TimelineSchemaDTO } from "@/schema/timeline.schema";
-import { SortableItem } from "@/modules/dashboard/timeline/dnd/sortableItem";
+import { SortableItem } from "@/modules/dashboard/timeline/components/dnd/sortableItem";
 
 type Props = {
   timelines: TimelineSchemaDTO[];
@@ -35,7 +35,7 @@ export const TimelinesDnd = ({
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
-    })
+    }),
   );
 
   function handleDragEnd(event: DragEndEvent) {

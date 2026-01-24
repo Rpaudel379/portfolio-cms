@@ -1,41 +1,56 @@
-import { typeIcons } from "@/app/(dashboard)/_const";
+import { deleteTimelineAction } from "@/app/(dashboard)/dashboard/timeline/_actions";
+import { useConfirm } from "@/components/confirm-context";
 import LimitedBadge from "@/components/limited-badge";
 import { Button } from "@/components/ui/button";
-import { useConfirmModal } from "@/hooks/use-confirm";
-import { useCustomAction } from "@/hooks/use-custom-action";
+import { typeIcons } from "@/const";
+import { useEnhancedAction } from "@/hooks/use-enhanced-action";
+
 import { TimelineSchemaDTO } from "@/schema/timeline.schema";
-import { ServerActionState } from "@/types/common.types";
 import { IconEdit, IconTrash } from "@tabler/icons-react";
-import React from "react";
+import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 type Props = {
   item: TimelineSchemaDTO;
   onTimelineSelect: (data: TimelineSchemaDTO) => void;
-  deleteTimeline: (data: string) => Promise<ServerActionState<void>>;
 };
 
-export const TimelineItem = ({
-  item,
-  onTimelineSelect,
-  deleteTimeline,
-}: Props) => {
-  const { execute: removeTimeline, isLoading: isDeleting } = useCustomAction(
-    deleteTimeline,
+export const TimelineItem = ({ item, onTimelineSelect }: Props) => {
+  const { execute: removeTimeline, isLoading: isDeleting } = useEnhancedAction(
+    deleteTimelineAction,
     {
+      onLoading(loading) {
+        if (loading) {
+          toast.loading("deleting timeline");
+        }
+      },
       onSuccess(message) {
+        toast.dismiss();
         toast.success(message);
       },
-      onError(message) {
-        toast.error(message);
+      onError(error) {
+        toast.error(error?.message);
       },
-    }
+    },
   );
 
-  const { confirmAction } = useConfirmModal();
+  const confirm = useConfirm();
+
+  const handleDelete = async () => {
+    const ok = await confirm({
+      title: "Do you want to delete this timeline?",
+      message: "If you delete this it cannot be undone. Are you sure?",
+      confirmText: "Yes, I am",
+      cancelText: "No, I am not",
+    });
+
+    if (ok) {
+      await removeTimeline(item.id);
+    }
+  };
 
   return (
-    <div className="flex items-start justify-between">
+    <div className="flex items-start justify-between relative">
       <div className="flex items-start gap-4">
         <div className="mt-1">
           <span className="text-xl sm:text-2xl">
@@ -76,17 +91,8 @@ export const TimelineItem = ({
         >
           <IconEdit className="h-4 w-4" />
         </Button>
-        <Button
-          size="sm"
-          variant="outline"
-          onClick={() =>
-            confirmAction(
-              () => removeTimeline(item.id),
-              "Are you sure you want to delete?"
-            )
-          }
-        >
-          <IconTrash className="h-4 w-4" />
+        <Button size="sm" variant="outline" onClick={handleDelete}>
+          {isDeleting ? <Loader2 className="animate-spin" /> : <IconTrash />}
         </Button>
       </div>
     </div>

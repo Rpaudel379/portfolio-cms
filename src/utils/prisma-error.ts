@@ -1,16 +1,37 @@
+import { AppError } from "@/types/common.types";
 import { Prisma } from "@prisma/client";
 
 export const handlePrismaErrors = (
-  error: Prisma.PrismaClientKnownRequestError
-) => {
-  let messageResponse = "";
-  if (error.code === "P2002") {
-    messageResponse = "Skill already exists";
-  } else if (error.code === "P2023") {
-    messageResponse = "The skill id is not correct";
-  } else {
-    messageResponse = "Database validation failed";
-  }
+  error: Prisma.PrismaClientKnownRequestError,
+): AppError => {
+  switch (error.code) {
+    case "P2002": {
+      // unique constraint
+      const target = (error?.meta?.target as string[]) || null;
 
-  return messageResponse;
+      if (target) {
+        return {
+          message: "Duplicate value",
+          fieldError: {
+            [target[0]]: `${target[0]} already exists`,
+          },
+        };
+      }
+      return {
+        message: "Duplicate value",
+        fieldError: null,
+      };
+    }
+    case "P2023": {
+      return {
+        message: "Invalid ID format",
+        fieldError: null,
+      };
+    }
+    default:
+      return {
+        message: "Bad Request",
+        fieldError: null,
+      };
+  }
 };

@@ -1,26 +1,23 @@
+import { AppError } from "@/types/common.types";
 import z, { ZodError } from "zod";
 
-type ErrorType = "form" | "field" | "general";
-
-export const handleZodErrors = (
-  err: ZodError,
-  type?: ErrorType
-): string | Record<string, string | string[]> => {
+export const handleZodErrors = (err: ZodError): AppError => {
   const { formErrors, fieldErrors } = z.flattenError(err);
-  const firstFormError = formErrors[0];
-  const firstFieldError = (Object.values(fieldErrors)[0] as string[])?.[0];
+  const message = formErrors[0] || "Bad Request";
 
-  switch (type) {
-    case "form":
-      return firstFormError ?? "";
+  if (Object.keys(fieldErrors).length) {
+    const errors: Record<string, string> = {};
+    Object.entries(fieldErrors).forEach(([field, error]) => {
+      errors[field] = (error as string)[0];
+    });
 
-    case "field":
-      return Object.keys(fieldErrors).length ? fieldErrors : {};
-
-    case "general":
-      return firstFormError ?? firstFieldError ?? "";
-
-    default:
-      return firstFormError ?? fieldErrors;
+    return {
+      message,
+      fieldError: errors,
+    };
   }
+  return {
+    message,
+    fieldError: null,
+  };
 };

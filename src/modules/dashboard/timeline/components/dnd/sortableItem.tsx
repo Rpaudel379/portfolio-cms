@@ -29,13 +29,13 @@ export function SortableItem({ id, children }: PropsWithChildren<Props>) {
 
   return (
     <div ref={setNodeRef} style={style} role="application">
-      <Card>
+      <Card className="gap-2">
         <CardHeader>
           <CardTitle ref={setActivatorNodeRef} {...attributes} {...listeners}>
             <GripVertical className="cursor-pointer text-primary hover:text-primary/70 active:text-blue-400" />
           </CardTitle>
         </CardHeader>
-        <CardContent className="p-6">{children}</CardContent>
+        <CardContent className="px-6">{children}</CardContent>
       </Card>
     </div>
   );

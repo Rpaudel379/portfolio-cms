@@ -3,34 +3,27 @@
 import { prisma } from "@/lib/prisma";
 import { idSchema } from "@/schema/common.schema";
 import {
+  TimelineSchema,
   timelineSchema,
   TimelineSchemaDTO,
-  timeSchemaDTO,
+  timelineSchemaDTO,
 } from "@/schema/timeline.schema";
 import { ServerActionState } from "@/types/common.types";
-import { handlePrismaErrors } from "@/utils/prisma-error";
-import { handleZodErrors } from "@/utils/zod-error";
-import { Prisma } from "@prisma/client";
-import { revalidatePath, updateTag } from "next/cache";
-import { resolve } from "path";
-import { ZodError } from "zod";
+import { handleErrorResponse } from "@/utils/error-response";
+import { updateTag } from "next/cache";
 
-export const saveTimeline = async (
-  _: any,
-  data: FormData
-): Promise<ServerActionState<void>> => {
+export const saveTimelineAction = async (
+  data: TimelineSchema | TimelineSchemaDTO,
+): Promise<ServerActionState<null>> => {
   try {
-    const rawTimeline = Object.fromEntries(data);
-    const isNew: boolean = !rawTimeline?.id;
-
+    const isNew: boolean = !("id" in data);
     if (isNew) {
-      const timeline = timelineSchema.parse(rawTimeline);
+      const timeline = timelineSchema.parse(data);
       await prisma.timeline.create({
         data: timeline,
       });
     } else {
-      const { createdAt, updatedAt, ...timeline } =
-        timeSchemaDTO.parse(rawTimeline);
+      const timeline = timelineSchemaDTO.parse(data);
       await prisma.timeline.update({
         where: { id: timeline.id },
         data: timeline,
@@ -46,80 +39,37 @@ export const saveTimeline = async (
       errors: null,
     };
   } catch (error) {
-    let messageResponse = "Something went wrong";
-    let errorResponse = null;
-
-    if (error instanceof ZodError) {
-      const err = handleZodErrors(error);
-      if (typeof err == "string") {
-        messageResponse = err;
-      } else {
-        errorResponse = err;
-      }
-    }
-
-    console.log("create timeline error");
-    console.dir(error, { depth: null });
-
-    if (error instanceof Prisma.PrismaClientKnownRequestError) {
-      console.log("inside create timeline PrismaClientKnownRequestError");
-      console.dir(error, { depth: null });
-      if (error.code === "P2002") {
-        messageResponse = "Skill already exists";
-      } else if (error.code === "P2023") {
-        messageResponse = "The skill id is not correct";
-      } else {
-        messageResponse = "Database validation failed";
-      }
-    }
-
-    return {
-      status: "failed",
-      message: messageResponse,
-      errors: errorResponse,
-      data: null,
-    };
+    return handleErrorResponse(error);
   }
 };
 
-export const bulkUpdate = async (
-  orderedTimeline: (TimelineSchemaDTO & { order: number })[]
-) => {
+export const bulkUpdateTimelineAction = async (
+  orderedTimeline: (TimelineSchemaDTO & { order: number })[],
+): Promise<ServerActionState<void>> => {
   try {
     await prisma.$transaction(
       orderedTimeline.map((timeline) =>
         prisma.timeline.update({
           where: { id: timeline.id },
           data: { order: timeline.order },
-        })
-      )
+        }),
+      ),
     );
 
     updateTag("timeline");
-  } catch (error) {
-    let messageResponse = "Something went wrong";
-    let errorResponse = null;
-
-    if (error instanceof ZodError) {
-      const err = handleZodErrors(error, "general") as string;
-      messageResponse = err;
-    }
-
-    if (error instanceof Prisma.PrismaClientKnownRequestError) {
-      messageResponse = handlePrismaErrors(error);
-    }
-
     return {
-      status: "failed",
-      message: messageResponse,
-      errors: errorResponse,
+      status: "success",
+      message: "Timeline Updated Successfully",
       data: null,
+      errors: null,
     };
+  } catch (error) {
+    return handleErrorResponse(error);
   }
 };
 
-export const deleteTimeline = async (
-  uuid: string
+export const deleteTimelineAction = async (
+  uuid: string,
 ): Promise<ServerActionState<void>> => {
   try {
     const id = idSchema.parse(uuid);
@@ -134,23 +84,6 @@ export const deleteTimeline = async (
       errors: null,
     };
   } catch (error) {
-    let messageResponse = "Something went wrong";
-    let errorResponse = null;
-
-    if (error instanceof ZodError) {
-      const err = handleZodErrors(error, "general") as string;
-      messageResponse = err;
-    }
-
-    if (error instanceof Prisma.PrismaClientKnownRequestError) {
-      messageResponse = handlePrismaErrors(error);
-    }
-
-    return {
-      status: "failed",
-      message: messageResponse,
-      errors: errorResponse,
-      data: null,
-    };
+    return handleErrorResponse(error);
   }
 };

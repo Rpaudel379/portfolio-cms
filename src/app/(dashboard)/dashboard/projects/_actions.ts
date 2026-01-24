@@ -9,20 +9,17 @@ import {
   ProjectSchemaDTO,
 } from "@/schema/project.schema";
 import { ServerActionState } from "@/types/common.types";
-import { handlePrismaErrors } from "@/utils/prisma-error";
+import { handleErrorResponse } from "@/utils/error-response";
 import {
   deleteObjectFromBucket,
   getPublicUrl,
   replaceObjectFromBucket,
   uploadFileToBucket,
 } from "@/utils/supabase/file";
-import { handleZodErrors } from "@/utils/zod-error";
-import { Prisma } from "@prisma/client";
 import { updateTag } from "next/cache";
-import { ZodError } from "zod";
 
-export const saveProject = async (
-  data: ProjectSchemaDTO | ProjectSchema
+export const saveProjectAction = async (
+  data: ProjectSchemaDTO | ProjectSchema,
 ): Promise<ServerActionState<void>> => {
   try {
     const isNew: boolean = !("id" in data);
@@ -35,7 +32,7 @@ export const saveProject = async (
       if (imageFile) {
         const { data, error } = await uploadFileToBucket(
           imageFile,
-          "thumbnail_bucket"
+          "thumbnail_bucket",
         );
 
         if (!error) {
@@ -68,12 +65,12 @@ export const saveProject = async (
           const { data, error } = await replaceObjectFromBucket(
             imagePath,
             "thumbnail_bucket",
-            imageFile
+            imageFile,
           );
           if (!error) {
             const publicUrl = await getPublicUrl(
               data?.path!,
-              "thumbnail_bucket"
+              "thumbnail_bucket",
             );
             if (publicUrl.length) {
               thumbnail = publicUrl;
@@ -84,13 +81,13 @@ export const saveProject = async (
         } else {
           const { data, error } = await uploadFileToBucket(
             imageFile,
-            "thumbnail_bucket"
+            "thumbnail_bucket",
           );
 
           if (!error) {
             const publicUrl = await getPublicUrl(
               data?.path!,
-              "thumbnail_bucket"
+              "thumbnail_bucket",
             );
             if (publicUrl.length) {
               thumbnail = publicUrl;
@@ -121,42 +118,12 @@ export const saveProject = async (
       errors: null,
     };
   } catch (error) {
-    let messageResponse = "Something went wrong";
-    let errorResponse = null;
-
-    if (error instanceof ZodError) {
-      const err = handleZodErrors(error);
-      if (typeof err == "string") {
-        messageResponse = err;
-      } else {
-        errorResponse = err;
-      }
-    }
-
-    console.log("create timeline error");
-
-    if (error instanceof Prisma.PrismaClientKnownRequestError) {
-      console.log("inside create timeline PrismaClientKnownRequestError");
-      if (error.code === "P2002") {
-        messageResponse = "Skill already exists";
-      } else if (error.code === "P2023") {
-        messageResponse = "The skill id is not correct";
-      } else {
-        messageResponse = "Database validation failed";
-      }
-    }
-
-    return {
-      status: "failed",
-      message: messageResponse,
-      errors: errorResponse,
-      data: null,
-    };
+    return handleErrorResponse(error);
   }
 };
 
-export const deleteProject = async (
-  uuid: string
+export const deleteProjectAction = async (
+  uuid: string,
 ): Promise<ServerActionState<void>> => {
   try {
     const id = idSchema.parse(uuid);
@@ -178,23 +145,6 @@ export const deleteProject = async (
       errors: null,
     };
   } catch (error) {
-    let messageResponse = "Something went wrong";
-    let errorResponse = null;
-
-    if (error instanceof ZodError) {
-      const err = handleZodErrors(error, "general") as string;
-      messageResponse = err;
-    }
-
-    if (error instanceof Prisma.PrismaClientKnownRequestError) {
-      messageResponse = handlePrismaErrors(error);
-    }
-
-    return {
-      status: "failed",
-      message: messageResponse,
-      errors: errorResponse,
-      data: null,
-    };
+    return handleErrorResponse(error);
   }
 };

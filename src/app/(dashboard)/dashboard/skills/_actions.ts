@@ -9,30 +9,24 @@ import {
 } from "@/schema/skill.schema";
 import { prisma } from "@/lib/prisma";
 import { ServerActionState } from "@/types/common.types";
-import { SaveSkill } from "@/types/skill.types";
-import { handleZodErrors } from "@/utils/zod-error";
 import { updateTag } from "next/cache";
-import { ZodError } from "zod";
-import { Prisma } from "@prisma/client";
-import { handlePrismaErrors } from "@/utils/prisma-error";
+import { handleErrorResponse } from "@/utils/error-response";
 
-export const saveSkill = async (
-  data: SkillSchema | SkillSchemaDTO
+export const saveSkillAction = async (
+  data: SkillSchema | SkillSchemaDTO,
 ): Promise<ServerActionState<null>> => {
   try {
     const isNew: boolean = !("id" in data);
 
     if (isNew) {
       const skill = skillSchema.parse(data);
-
       await prisma.skill.create({
         data: skill,
       });
     } else {
-      const { id, createdAt, updatedAt, ...skill } = skillSchemaDTO.parse(data);
-
+      const skill = skillSchemaDTO.parse(data);
       await prisma.skill.update({
-        where: { id: id },
+        where: { id: skill.id },
         data: skill,
       });
     }
@@ -45,32 +39,12 @@ export const saveSkill = async (
       errors: null,
     };
   } catch (error) {
-    let messageResponse = "Something went wrong";
-    let errorResponse = null;
-
-    if (error instanceof ZodError) {
-      const err = handleZodErrors(error, "general") as string;
-      messageResponse = err;
-    }
-
-    console.log("save skill error");
-    console.dir(error, { depth: null });
-
-    if (error instanceof Prisma.PrismaClientKnownRequestError) {
-      messageResponse = handlePrismaErrors(error);
-    }
-
-    return {
-      status: "failed",
-      message: messageResponse,
-      errors: errorResponse,
-      data: null,
-    };
+    return handleErrorResponse(error);
   }
 };
 
-export const deleteSkill = async (
-  uuid: string
+export const deleteSkillAction = async (
+  uuid: string,
 ): Promise<ServerActionState<null>> => {
   try {
     const id = idSchema.parse(uuid);
@@ -85,23 +59,6 @@ export const deleteSkill = async (
       errors: null,
     };
   } catch (error) {
-    let messageResponse = "Something went wrong";
-    let errorResponse = null;
-
-    if (error instanceof ZodError) {
-      const err = handleZodErrors(error, "general") as string;
-      messageResponse = err;
-    }
-
-    if (error instanceof Prisma.PrismaClientKnownRequestError) {
-      messageResponse = handlePrismaErrors(error);
-    }
-
-    return {
-      status: "failed",
-      message: messageResponse,
-      errors: errorResponse,
-      data: null,
-    };
+    return handleErrorResponse(error);
   }
 };

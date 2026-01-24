@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { prisma } from "@/lib/prisma";
-import { ProjectPageClient } from "@/modules/dashboard/projects/main";
+import { ProjectPageClient } from "@/modules/dashboard/projects";
 import { ProjectSchemaDTO } from "@/schema/project.schema";
 import { PlusIcon } from "lucide-react";
 import { cacheTag } from "next/cache";
@@ -14,7 +14,6 @@ const ProjectsPage = async () => {
   };
 
   const projects = await getAllProjects();
-
   return (
     <div className="space-y-6">
       {/* Header */}

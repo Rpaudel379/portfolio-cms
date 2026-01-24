@@ -1,11 +1,9 @@
-import { deleteProject } from "@/app/(dashboard)/dashboard/projects/_actions";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import ProjectCard from "@/modules/dashboard/projects/project-card";
+import ProjectCard from "@/modules/dashboard/projects/components/project-card";
 import { ProjectSchemaDTO } from "@/schema/project.schema";
 import { BarChart3Icon, PlusIcon } from "lucide-react";
 import Link from "next/link";
-import React from "react";
 
 type Props = {
   projects: ProjectSchemaDTO[];
@@ -47,11 +45,7 @@ const ProjectList = ({
   return (
     <div className="space-y-4">
       {projects.map((project) => (
-        <ProjectCard
-          key={project.id}
-          project={project}
-          deleteProject={deleteProject}
-        />
+        <ProjectCard key={project.id} project={project} />
       ))}
     </div>
   );

@@ -17,9 +17,29 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Anish Paudel | Portfolio Website",
+  title: "Anish Paudel | Software Engineer",
   description:
-    "Crafting digital experiences with reliable backend systems and  modern web technologies.",
+    "Anish Paudel is a Software Engineer specialized in crafting digital experiences with reliable backend systems and  modern web technologies.",
+  keywords: [
+    "Anish Paudel",
+    "Software Engineer",
+    "Full Stack Developer",
+    "Node.js Developer",
+    "React Developer",
+    "NextJS Developer",
+    "Java Developer",
+  ],
+  authors: [{ name: "Anish Paudel", url: "https://anishsite.vercel.app/" }],
+  creator: "Anish Paudel",
+  openGraph: {
+    title: "Anish Paudel | Software Engineer",
+    description:
+      "Portfolio of Anish Paudel - Software Engineer working with Node.js, React, Java and backend systems.",
+    url: "https://anishsite.vercel.app/",
+    siteName: "Anish Paudel Portfolio",
+    type: "website",
+  },
+  robots: { index: true, follow: true },
 };
 
 export default function RootLayout({

@@ -1,8 +1,8 @@
 "use client";
-import { typeIcons } from "@/app/(dashboard)/_const";
 import LimitedBadge from "@/components/limited-badge";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
+import { typeIcons } from "@/const";
 import { TimelineSchemaDTO } from "@/schema/timeline.schema";
 import { useScroll, useTransform, motion } from "motion/react";
 import React, { useEffect, useRef, useState } from "react";

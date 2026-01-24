@@ -16,4 +16,20 @@ export enum CategoryEnum {
   "Other" = "Other",
 }
 
+export enum TimelineTypeEnum {
+  "WORK" = "WORK",
+  "EDUCATION" = "EDUCATION",
+  "FREELANCE" = "FREELANCE",
+  "PROJECT" = "PROJECT",
+  "ACHIEVEMENT" = "ACHIEVEMENT",
+}
+
+export const typeIcons = {
+  EDUCATION: "🎓",
+  WORK: "💼",
+  PROJECT: "🚀",
+  ACHIEVEMENT: "🏆",
+  FREELANCE: "🖥️",
+};
+
 export const sortOptions = ["newest", "oldest", "title"] as const;

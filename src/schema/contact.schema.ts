@@ -7,7 +7,7 @@ export const contactSchema = z.object(
     phone: z.string({ error: "Valid mobile number is required" }),
     location: z.string({ error: "Valid field is required" }),
   },
-  { error: "Valid data is required" }
+  { error: "Valid data is required" },
 );
 
 export type ContactSchema = z.infer<typeof contactSchema>;

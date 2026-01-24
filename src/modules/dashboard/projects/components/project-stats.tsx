@@ -1,16 +1,18 @@
 import { Card, CardContent } from "@/components/ui/card";
+import { ProjectSchemaDTO } from "@/schema/project.schema";
 import { BarChart3Icon } from "lucide-react";
-import React from "react";
 
 type Props = {
-  stats: {
-    total: number;
-    live: number;
-    development: number;
-  };
+  projects: ProjectSchemaDTO[];
 };
 
-export const ProjectStats = ({ stats }: Props) => {
+export const ProjectStats = ({ projects }: Props) => {
+  const stats = {
+    total: projects.length,
+    live: projects.filter((p) => p.status === "LIVE").length,
+    development: projects.filter((p) => p.status === "DEVELOPMENT").length,
+  };
+
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
       <Card>

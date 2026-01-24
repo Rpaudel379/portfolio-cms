@@ -1,5 +1,6 @@
 "use client";
 
+import { saveSkillAction } from "@/app/(dashboard)/dashboard/skills/_actions";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -11,53 +12,51 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { useEnhancedAction } from "@/hooks/use-enhanced-action";
 import { skillSchemaDTO, SkillSchemaDTO } from "@/schema/skill.schema";
-import { ServerActionState } from "@/types/common.types";
 import { zodResolver } from "@hookform/resolvers/zod";
-import React, { useEffect } from "react";
+import { IconPlus } from "@tabler/icons-react";
+import { Loader2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 type Props = {
   skill: SkillSchemaDTO;
-  updateSkill: (data: SkillSchemaDTO) => Promise<ServerActionState<null>>;
   onClose?: () => void;
 };
 
-const UpdateSkill = ({ skill, updateSkill, onClose }: Props) => {
+export const UpdateSkill = ({ skill, onClose }: Props) => {
   const form = useForm({
     resolver: zodResolver(skillSchemaDTO),
     defaultValues: skill,
-    mode: "onSubmit",
   });
 
-  const handleSubmit = async (data: SkillSchemaDTO) => {
-    try {
-      const res = await updateSkill(data);
-      if (res.status === "success") {
-        toast.success(res.message);
-        onClose?.();
-      } else {
-        toast.error(res.message);
-        if (res.errors) {
-          Object.entries(res.errors).forEach(([field, message]) => {
-            form.setError(field as never, {
-              message: message[0],
-              type: "manual",
-            });
+  const isSubmitting = form.formState.isSubmitting;
+
+  const { execute: update } = useEnhancedAction(saveSkillAction, {
+    onSuccess(message) {
+      onClose?.();
+      toast.success(message);
+    },
+    onError(errors) {
+      if (errors?.fieldError) {
+        Object.entries(errors.fieldError).forEach(([field, message]) => {
+          form.setError(field as never, {
+            message: message,
           });
-        }
+        });
+      } else {
+        form.setError("name", {
+          message: errors?.message,
+        });
       }
-    } catch (error) {
-      console.log(error);
-      toast.error("Something went wrong");
-    }
-  };
+    },
+  });
 
   return (
     <div>
       <Form {...form}>
-        <form className="space-y-5" onSubmit={form.handleSubmit(handleSubmit)}>
+        <form className="space-y-5" onSubmit={form.handleSubmit(update)}>
           <FormField
             control={form.control}
             name="name"
@@ -65,13 +64,16 @@ const UpdateSkill = ({ skill, updateSkill, onClose }: Props) => {
               <FormItem>
                 <FormLabel>Name</FormLabel>
                 <FormControl>
-                  <Input placeholder="Enter name" {...field} />
+                  <Input
+                    {...field}
+                    placeholder="Enter name"
+                    disabled={isSubmitting}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
-
           <FormField
             control={form.control}
             name="visible"
@@ -81,6 +83,7 @@ const UpdateSkill = ({ skill, updateSkill, onClose }: Props) => {
                   <Checkbox
                     checked={field.value}
                     onCheckedChange={field.onChange}
+                    disabled={isSubmitting}
                   />
                 </FormControl>
                 <div className="space-y-1 leading-none">
@@ -89,13 +92,17 @@ const UpdateSkill = ({ skill, updateSkill, onClose }: Props) => {
               </FormItem>
             )}
           />
-
           <div className="flex flex-col md:flex-row space-y-4 space-x-4">
             <Button type="button" variant="outline" onClick={() => onClose?.()}>
               Cancel
             </Button>
-            <Button type="submit" disabled={form.formState.isSubmitting}>
-              {form.formState.isSubmitting ? "Saving..." : "Save changes"}
+            <Button type="submit" disabled={isSubmitting}>
+              {!isSubmitting ? (
+                <IconPlus className="h-4 w-4 mr-2" />
+              ) : (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              )}
+              {!isSubmitting ? "Save changes" : "Saving..."}
             </Button>
           </div>
         </form>
@@ -103,5 +110,3 @@ const UpdateSkill = ({ skill, updateSkill, onClose }: Props) => {
     </div>
   );
 };
-
-export default UpdateSkill;

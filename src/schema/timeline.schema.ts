@@ -3,7 +3,7 @@ import { z } from "zod";
 
 export const timelineTypeEnum = z.enum(
   ["EDUCATION", "WORK", "PROJECT", "ACHIEVEMENT", "FREELANCE"],
-  { error: "Valid type is required" }
+  { error: "Type is invalid" },
 );
 
 export type TimelineTypeEnum = z.infer<typeof timelineTypeEnum>;
@@ -15,7 +15,9 @@ export const timelineSchema = z.object(
         error: "year is required",
       })
       .min(4, "valid date is required")
-      .max(4, "valid date is required"),
+      .max(4, "valid date is required")
+      .optional()
+      .default(() => new Date().getFullYear().toString()),
     title: z
       .string()
       .min(3, "Title is very small")
@@ -28,15 +30,15 @@ export const timelineSchema = z.object(
     work_type: timelineTypeEnum,
     skills: z.string().max(100, "Skills are too long").nullish(),
   },
-  { error: "Valid Timeline data is required" }
+  { error: "Valid Timeline data is required" },
 );
 
 export type TimelineSchema = z.infer<typeof timelineSchema>;
 
-export const timeSchemaDTO = timelineSchema.extend({
+export const timelineSchemaDTO = timelineSchema.extend({
   id: idSchema,
   createdAt: z.date().or(z.string()),
   updatedAt: z.date().or(z.string()),
 });
 
-export type TimelineSchemaDTO = z.infer<typeof timeSchemaDTO>;
+export type TimelineSchemaDTO = z.infer<typeof timelineSchemaDTO>;
