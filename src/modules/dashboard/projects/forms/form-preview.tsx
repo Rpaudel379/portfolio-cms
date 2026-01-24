@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   Card,
   CardContent,
@@ -10,14 +10,14 @@ import { useFormContext } from "react-hook-form";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { ProjectSchema, ProjectSchemaDTO } from "@/schema/project.schema";
+import { ProjectSchemaDTO } from "@/schema/project.schema";
 import { Badge } from "@/components/ui/badge";
 
 type Props = {
-  loading: boolean;
+  isNew: boolean;
 };
 
-export const FormPreview = ({ loading }: Props) => {
+export const FormPreview = ({ isNew }: Props) => {
   const { watch } = useFormContext<ProjectSchemaDTO>();
   const values = watch();
 
@@ -55,7 +55,7 @@ export const FormPreview = ({ loading }: Props) => {
               src={
                 imageHref ||
                 `/placeholder.svg?height=300&width=400&text=${encodeURIComponent(
-                  values.title || "Project"
+                  values.title || "Project",
                 )}`
               }
               alt="Preview"
@@ -119,13 +119,8 @@ export const FormPreview = ({ loading }: Props) => {
 
       {/* Actions */}
       <div className="flex flex-col gap-2">
-        <Button
-          disabled={loading}
-          className="w-full"
-          type="submit"
-          form="projectForm"
-        >
-          {loading ? "Adding Project..." : "Add Project"}
+        <Button className="w-full" type="submit" form="projectForm">
+          {isNew ? "Create Project" : "Update Project"}
         </Button>
         <Button
           variant="outline"

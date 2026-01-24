@@ -14,7 +14,6 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Trash } from "lucide-react";
-import React from "react";
 import { useFieldArray, useFormContext } from "react-hook-form";
 
 const Features = () => {
