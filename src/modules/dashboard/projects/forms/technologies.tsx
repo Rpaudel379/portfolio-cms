@@ -47,11 +47,11 @@ const Technologies = ({ tags, data }: Props) => {
   const availableCategories = () => {
     const techCategories = Object.keys(technologies);
     return Object.values(CategoryEnum).filter(
-      (cat) => !techCategories.find((existing) => existing === cat)
+      (cat) => !techCategories.find((existing) => existing === cat),
     );
   };
 
-  const [selectedCategory, _] = useState("");
+  const [selectedCategory] = useState("");
 
   const handleSelectedCategory = (category: string) => {
     setTechnologies((prev) => ({ ...prev, [category]: [] }));

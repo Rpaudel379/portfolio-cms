@@ -1,4 +1,3 @@
-import React from "react";
 import { useFormContext } from "react-hook-form";
 import {
   Card,
@@ -16,9 +15,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 
-type Props = {};
-
-export const Links = ({}: Props) => {
+export const Links = () => {
   const { control } = useFormContext();
 
   return (

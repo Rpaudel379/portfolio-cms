@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { prisma } from "@/lib/prisma";
-import ProjectForm from "@/modules/dashboard/projects/forms/project-form";
+import ProjectForm from "@/modules/dashboard/projects/forms";
 import { ArrowLeftIcon } from "lucide-react";
 import Link from "next/link";
 
