@@ -26,7 +26,7 @@ export const timelineSchema = z.object(
     description: z
       .string({ error: "description is required" })
       .min(5, "Description is too short")
-      .max(500, "Description is too long"),
+      .max(2000, "Description is too long"),
     work_type: timelineTypeEnum,
     skills: z.string().max(100, "Skills are too long").nullish(),
   },
