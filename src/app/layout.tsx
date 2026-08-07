@@ -4,6 +4,7 @@ import "./globals.css";
 
 import { ThemeProvider } from "@/components/themes/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
+import { siteConfig } from "@/lib/site";
 import { Suspense } from "react";
 
 const geistSans = Geist({
@@ -17,27 +18,28 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Anish Paudel | Software Engineer",
-  description:
-    "Anish Paudel is a Software Engineer specialized in crafting digital experiences with reliable backend systems and  modern web technologies.",
-  keywords: [
-    "Anish Paudel",
-    "Software Engineer",
-    "Full Stack Developer",
-    "Node.js Developer",
-    "React Developer",
-    "NextJS Developer",
-    "Java Developer",
-  ],
-  authors: [{ name: "Anish Paudel", url: "https://anishsite.vercel.app/" }],
-  creator: "Anish Paudel",
+  metadataBase: new URL(siteConfig.url),
+  title: {
+    default: siteConfig.title,
+    template: siteConfig.titleTemplate,
+  },
+  description: siteConfig.description,
+  keywords: [...siteConfig.keywords],
+  authors: [{ name: siteConfig.author, url: siteConfig.url }],
+  creator: siteConfig.author,
+  alternates: { canonical: "/" },
   openGraph: {
-    title: "Anish Paudel | Software Engineer",
-    description:
-      "Portfolio of Anish Paudel - Software Engineer working with Node.js, React, Java and backend systems.",
-    url: "https://anishsite.vercel.app/",
-    siteName: "Anish Paudel Portfolio",
+    title: siteConfig.title,
+    description: siteConfig.shortDescription,
+    url: siteConfig.url,
+    siteName: siteConfig.name,
+    locale: "en_US",
     type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: siteConfig.title,
+    description: siteConfig.shortDescription,
   },
   robots: { index: true, follow: true },
 };

@@ -23,6 +23,11 @@ Instead of manually editing code and running `git commit && git push` every time
 
 - 🔄 **Instant Updates** – client site reflects changes without redeploying
 - **📌 Draggable Timeline / Experience** – Timeline/experience section supports drag-and-drop sorting for easy reordering from the dashboard.
+- 🔍 **SEO built in**
+  - Per-page titles, descriptions and canonical URLs
+  - Auto-generated `robots.txt` and `sitemap.xml`
+  - Open Graph / Twitter card tags with a generated preview image
+  - Dashboard routes excluded from crawlers
 
 ---
 
@@ -60,7 +65,7 @@ bun install
 Create a `.env` file in the root and add:
 
 ```
-cp .env.example .env
+cp .env.sample .env
 
 # or
 
@@ -74,9 +79,32 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY="<get from supabase dashboard>"
 
 BETTER_AUTH_SECRET="your secret key"
 BETTER_AUTH_URL="Base URL of your frontend"
+
+NEXT_PUBLIC_SITE_URL="https://www.example.com"
 ```
 
-### 4️⃣ Run database migrations:
+
+### 4️⃣ Make it yours
+
+Everything else about the site's public identity lives in one file —
+[`src/lib/site.ts`](src/lib/site.ts). Edit `siteConfig` to replace the name,
+role, description and keywords with your own:
+
+```ts
+export const siteConfig = {
+  name: "Your Name Portfolio",
+  author: "Your Name",
+  role: "Software Engineer",
+  title: "Your Name | Software Engineer",
+  titleTemplate: "%s | Your Name",
+  // ...
+} as const;
+```
+
+The generated social preview image at `src/app/opengraph-image.tsx` reads from
+the same config, so it updates automatically.
+
+### 5️⃣ Run database migrations:
 
 ```
 npx prisma migrate dev
@@ -84,7 +112,7 @@ npx prisma migrate dev
 bunx prisma migrate dev
 ```
 
-### 5️⃣ Run locally
+### 6️⃣ Run locally
 
 ```
 npm run dev
@@ -92,7 +120,7 @@ npm run dev
 bun run dev
 ```
 
-### 6️⃣ Build for production
+### 7️⃣ Build for production
 
 ```
 npm run build
@@ -113,20 +141,24 @@ bun run start
 ├── src/                  # Application source code
 │   ├── app/              # Next.js App Router
 │   │   ├── (dashboard)/  # Admin dashboard (authenticated CMS)
-│   │   ├── (portfolio)/  # Public portfolio pages
+│   │   ├── (portfolio)/  # Public portfolio pages (incl. /signin)
+│   │   ├── api/          # Route handlers (Better Auth)
 │   │   ├── favicon.ico   # App favicon
-│   │   ├── global-error.tsx  # Global error boundary
+│   │   ├── global-error.tsx     # Global error boundary
 │   │   ├── globals.css   # Global styles
-│   │   ├── layout.tsx    # Root layout
-│   │   └── signin/       # Sign-in page
+│   │   ├── layout.tsx    # Root layout + site-wide metadata
+│   │   ├── opengraph-image.tsx  # Generated social preview image
+│   │   ├── robots.ts     # Generates /robots.txt
+│   │   └── sitemap.ts    # Generates /sitemap.xml
 │   │
 │   ├── components/       # Reusable UI components
 │   ├── hooks/            # Custom React hooks
-│   ├── lib/              # Core libraries & configs
+│   ├── lib/              # Core libraries & configs (incl. site.ts)
 │   ├── modules/          # Feature-specific modules
 │   ├── schema/           # Zod/validation schemas
 │   ├── types/            # TypeScript types
-│   └── utils/            # Utility functions
+│   ├── utils/            # Utility functions
+│   └── proxy.ts          # Auth gate for /dashboard + /resume, /sde rewrites
 │
 ├── .env                  # Environment variables
 ├── package.json          # Project dependencies and scripts
@@ -135,7 +167,7 @@ bun run start
 
 ## 🔗 Live Demo
 
-[🌐 View Live Demo](https://anishsite.netlify.app)
+[🌐 View Live Site](https://www.anishpaudel.com)
 
 ## 🔮 Future Improvements
 

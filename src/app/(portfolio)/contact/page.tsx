@@ -1,7 +1,21 @@
 import { prisma } from "@/lib/prisma";
 import { ContactPageClient } from "@/modules/contact/main";
 import { ContactSchemaDTO } from "@/schema/contact.schema";
+import type { Metadata } from "next";
 import { cacheTag } from "next/cache";
+
+export const metadata: Metadata = {
+  title: "Contact",
+  description:
+    "Get in touch with Anish Paudel about software engineering roles, freelance work or collaboration.",
+  alternates: { canonical: "/contact" },
+  openGraph: {
+    title: "Contact | Anish Paudel",
+    description:
+      "Get in touch with Anish Paudel about software engineering roles, freelance work or collaboration.",
+    url: "/contact",
+  },
+};
 
 export default async function Contact() {
   const getContactDetail = async () => {

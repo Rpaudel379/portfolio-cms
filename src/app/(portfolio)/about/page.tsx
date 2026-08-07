@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import type { Metadata } from "next";
 
 import Journey from "@/modules/about/journey";
 import { JourneyLoading } from "@/modules/about/journey-fallback";
@@ -9,6 +10,19 @@ import { IconBrandGithub, IconBrandLinkedin } from "@tabler/icons-react";
 import { Download, Mail } from "lucide-react";
 import Link from "next/link";
 import { Suspense } from "react";
+
+export const metadata: Metadata = {
+  title: "About",
+  description:
+    "The journey, skills and engineering background of Anish Paudel - a Software Engineer working with Node.js, React, Java and backend systems.",
+  alternates: { canonical: "/about" },
+  openGraph: {
+    title: "About | Anish Paudel",
+    description:
+      "The journey, skills and engineering background of Anish Paudel - a Software Engineer working with Node.js, React, Java and backend systems.",
+    url: "/about",
+  },
+};
 
 const AboutPage = () => {
   return (

@@ -1,8 +1,22 @@
 import { prisma } from "@/lib/prisma";
 import ProjectPageClient from "@/modules/projects";
 import { ProjectSchemaDTO } from "@/schema/project.schema";
+import type { Metadata } from "next";
 import { cacheTag } from "next/cache";
 import { Suspense } from "react";
+
+export const metadata: Metadata = {
+  title: "Projects",
+  description:
+    "Selected projects by Anish Paudel, spanning backend services, full stack web applications and developer tooling.",
+  alternates: { canonical: "/projects" },
+  openGraph: {
+    title: "Projects | Anish Paudel",
+    description:
+      "Selected projects by Anish Paudel, spanning backend services, full stack web applications and developer tooling.",
+    url: "/projects",
+  },
+};
 
 const ProjectPage = async () => {
   const getAllProjects = async () => {
