@@ -55,12 +55,14 @@ export const FileList = ({
             {file.name}
           </p>
           <div className="cursor-pointer flex flex-col lg:flex-row items-start space-x-2 text-xs text-muted-foreground">
-            <span>{formatFileSize(file.metadata.size)}</span>
+            <span>{formatFileSize(file.metadata?.size ?? 0)}</span>
             <span className="hidden lg:block">•</span>
             <div className="flex items-center space-x-1">
               <Calendar className="h-3 w-3" />
               <span>
-                {formatDate(file.metadata.lastModified, { fromNow: true })}
+                {file.metadata?.lastModified
+                  ? formatDate(file.metadata.lastModified, { fromNow: true })
+                  : "—"}
               </span>
             </div>
           </div>

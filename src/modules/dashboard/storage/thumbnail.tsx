@@ -5,7 +5,7 @@ import React from "react";
 type Props = {
   object: {
     url: string;
-    id: string;
+    id: string | null;
     name: string;
     mimetype: string | undefined;
   };

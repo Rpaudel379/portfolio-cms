@@ -33,7 +33,7 @@ export const ThumbnailContainer = async ({ list, bucketName }: Props) => {
   return (
     <div className="border-2 bg-secondary px-5 py-10 md:px-10 md:py-20 rounded-lg flex gap-5 flex-wrap">
       {thumbnails.map((thumbnail) => (
-        <Thumbnail key={thumbnail.id} object={thumbnail} />
+        <Thumbnail key={thumbnail.id ?? thumbnail.name} object={thumbnail} />
       ))}
     </div>
   );
