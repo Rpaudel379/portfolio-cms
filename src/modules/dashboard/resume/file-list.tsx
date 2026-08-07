@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Calendar, Download, File, Files, Trash2 } from "lucide-react";
+import { Calendar, Download, File } from "lucide-react";
 import { FileObject } from "@supabase/storage-js";
 import { downloadBlob, formatDate, formatFileSize } from "@/lib/utils";
 import {
@@ -12,7 +12,6 @@ import { toast } from "sonner";
 
 export const FileList = ({
   file,
-  type,
 }: {
   file: FileObject | undefined;
   type: "resume" | "sde";
