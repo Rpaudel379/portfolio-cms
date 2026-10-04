@@ -85,6 +85,26 @@ model Project {
   updatedAt DateTime @updatedAt
 }
 
+enum UplinkAssetStatus {
+  PENDING
+  READY
+}
+
+model UplinkAsset {
+  id             String            @id @default(uuid()) @db.Uuid
+  publicName     String            @unique @db.VarChar(180)
+  bucketName     String
+  objectKey      String
+  originalName   String
+  contentType    String
+  size           BigInt
+  status         UplinkAssetStatus @default(PENDING)
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+
+  @@unique([bucketName, objectKey])
+}
+
 model User {
   id            String    @id
   name          String

@@ -8,6 +8,7 @@ import {
   IconUser,
   IconDatabase,
   IconFileCv,
+  IconLink,
 } from "@tabler/icons-react";
 
 export const dashboardItems = [
@@ -43,6 +44,11 @@ export const contentItems = [
     title: "Storage",
     url: "/dashboard/storage",
     icon: IconDatabase,
+  },
+  {
+    title: "Uplink",
+    url: "/dashboard/uplink",
+    icon: IconLink,
   },
   {
     title: "Resume",
