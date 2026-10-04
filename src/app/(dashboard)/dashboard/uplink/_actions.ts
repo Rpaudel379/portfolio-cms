@@ -226,34 +226,26 @@ export const deleteUplinkAsset = async (
       return failed("Uplink storage is not configured");
     }
 
-    const publicName = await prisma.$transaction(
-      async (transaction) => {
-        const asset = await transaction.uplinkAsset.findUnique({
-          where: { id },
-          select: { bucketName: true, objectKey: true, publicName: true },
-        });
+    const asset = await prisma.uplinkAsset.findUnique({
+      where: { id },
+      select: { bucketName: true, objectKey: true, publicName: true },
+    });
 
-        if (!asset) return null;
-
-        await storage.client.send(
-          new DeleteObjectCommand({
-            Bucket: asset.bucketName,
-            Key: asset.objectKey,
-          }),
-        );
-        await transaction.uplinkAsset.delete({ where: { id } });
-
-        return asset.publicName;
-      },
-      { timeout: 15_000 },
-    );
-
-    if (!publicName) {
+    if (!asset) {
       return failed("Uplink file was not found");
     }
 
+    // Delete from R2 first so a storage error leaves the database row intact.
+    await storage.client.send(
+      new DeleteObjectCommand({
+        Bucket: asset.bucketName,
+        Key: asset.objectKey,
+      }),
+    );
+    await prisma.uplinkAsset.delete({ where: { id } });
+
     revalidatePath("/dashboard/uplink");
-    revalidatePath(`/uplink/${encodeURIComponent(publicName)}`);
+    revalidatePath(`/uplink/${encodeURIComponent(asset.publicName)}`);
 
     return {
       status: "success",

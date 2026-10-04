@@ -15,11 +15,7 @@ import {
 import { usePathname, useRouter } from "next/navigation";
 import { IconUser, IconLogout } from "@tabler/icons-react";
 import Link from "next/link";
-import {
-  contentItems,
-  dashboardItems,
-  settingsItems,
-} from "@/app/(dashboard)/_const";
+import { contentItems, dashboardItems } from "@/app/(dashboard)/_const";
 import { ThemeToggle } from "@/components/themes/theme-toggle";
 import { Code } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
@@ -82,24 +78,6 @@ const SidebarDashboard = () => {
           <SidebarGroupContent>
             <SidebarMenu>
               {contentItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild isActive={pathname === item.url}>
-                    <Link href={item.url}>
-                      <item.icon />
-                      <span>{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        <SidebarGroup>
-          <SidebarGroupLabel>Settings</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {settingsItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild isActive={pathname === item.url}>
                     <Link href={item.url}>

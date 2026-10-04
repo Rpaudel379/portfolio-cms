@@ -56,16 +56,3 @@ export const contentItems = [
     icon: IconFileCv,
   },
 ];
-
-export const settingsItems = [
-  {
-    title: "Profile",
-    url: "/dashboard/profile",
-    icon: IconUser,
-  },
-  {
-    title: "Settings",
-    url: "/dashboard/settings",
-    icon: IconSettings,
-  },
-];
