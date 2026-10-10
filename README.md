@@ -33,6 +33,7 @@ Instead of manually editing code and running `git commit && git push` every time
   - Per-page titles, descriptions and canonical URLs
   - Auto-generated `robots.txt` and `sitemap.xml`
   - Open Graph / Twitter card tags with a generated preview image
+  - JSON-LD structured data (`WebSite`, `Person`, `ProfilePage`) linking the site to your GitHub and LinkedIn profiles
   - Dashboard routes excluded from crawlers
 
 ---
@@ -45,7 +46,7 @@ Instead of manually editing code and running `git commit && git push` every time
 - **Database:** Supabase PostgreSQL + Prisma ORM
 - **Storage:** Supabase Buckets; optional Cloudflare R2 for Uplink
 - **Animations:** react-bits, aceternity
-- **Other Tools:** TypeScript
+- **Other Tools:** TypeScript, schema-dts (typed JSON-LD)
 
 ---
 
@@ -140,21 +141,26 @@ The dashboard supports pending and ready upload records, link copying, and delet
 
 Everything else about the site's public identity lives in one file —
 [`src/lib/site.ts`](src/lib/site.ts). Edit `siteConfig` to replace the name,
-role, description and keywords with your own:
+role, description, keywords and profile links with your own:
 
 ```ts
 export const siteConfig = {
-  name: "Your Name Portfolio",
+  name: "Your Name",
   author: "Your Name",
   role: "Software Engineer",
-  title: "Your Name | Software Engineer",
+  title: "Your Name",
   titleTemplate: "%s | Your Name",
   // ...
+  profiles: {
+    github: "https://github.com/your-username",
+    linkedin: "https://www.linkedin.com/in/your-username/",
+  },
 } as const;
 ```
 
-The generated social preview image at `src/app/opengraph-image.tsx` reads from
-the same config, so it updates automatically.
+The generated social preview image at `src/app/opengraph-image.tsx` and the
+JSON-LD structured data in `src/lib/json-ld.ts` read from the same config, so
+they update automatically.
 
 ### 5️⃣ Run database migrations:
 
@@ -205,7 +211,7 @@ bun run start
 │   │
 │   ├── components/       # Reusable UI components
 │   ├── hooks/            # Custom React hooks
-│   ├── lib/              # Core libraries & configs (incl. site.ts)
+│   ├── lib/              # Core libraries & configs (incl. site.ts, json-ld.ts)
 │   ├── modules/          # Feature-specific modules
 │   ├── schema/           # Zod/validation schemas
 │   ├── types/            # TypeScript types
@@ -219,7 +225,7 @@ bun run start
 
 ## 🔗 Live Demo
 
-[🌐 View Live Site](https://www.anishpaudel.com)
+[🌐 View Live Site](https://anishpaudel.com)
 
 ## 🔮 Future Improvements
 

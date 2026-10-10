@@ -1,10 +1,12 @@
 import { AnimatedBackground } from "@/components/animations/animated-background";
 import { TypewriterText } from "@/components/animations/typewritter-text";
+import { JsonLd } from "@/components/json-ld";
 import { BackgroundLines } from "@/components/ui/background-lines";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Cover } from "@/components/ui/cover";
+import { homeJsonLd } from "@/lib/json-ld";
 import { IconBrandGithub, IconBrandLinkedin } from "@tabler/icons-react";
 import { ArrowRight, Code, Download, Mail, Star } from "lucide-react";
 import Link from "next/link";
@@ -21,6 +23,7 @@ const HomePage = () => {
 
   return (
     <div className="relative overflow-hidden">
+      <JsonLd data={homeJsonLd} />
       <AnimatedBackground />
       {/* <FloatingElements /> */}
 
@@ -56,7 +59,7 @@ const HomePage = () => {
                   <Cover>
                     <span className="block bg-gradient-to-r from-foreground via-primary to-purple-600 bg-clip-text text-transparent animate-gradient">
                       ANISH
-                    </span>
+                    </span>{" "}
                     <span className="block text-foreground/80 -mt-2">
                       PAUDEL
                     </span>

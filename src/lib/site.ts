@@ -11,10 +11,10 @@ const url = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 export const siteConfig = {
   url,
   domain: new URL(url).host,
-  name: "Anish Paudel Portfolio",
+  name: "Anish Paudel",
   author: "Anish Paudel",
   role: "Software Engineer",
-  title: "Anish Paudel | Software Engineer",
+  title: "Anish Paudel",
   titleTemplate: "%s | Anish Paudel",
   description:
     "Anish Paudel is a Software Engineer focused on building reliable, scalable software systems, from backend platforms and distributed services to modern web applications using Node.js, Fastify, PostgreSQL, React, and Next.js.",
@@ -45,4 +45,9 @@ export const siteConfig = {
     "MongoDB",
     "Docker",
   ],
+  /** Your profiles on other sites. Listed as JSON-LD `sameAs` so search engines link them to this site. */
+  profiles: {
+    github: "https://github.com/Rpaudel379",
+    linkedin: "https://www.linkedin.com/in/rpaudel379/",
+  },
 } as const;
