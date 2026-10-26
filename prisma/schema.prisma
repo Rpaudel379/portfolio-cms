@@ -100,24 +100,25 @@ model UplinkAsset {
   size         BigInt
   status       UplinkAssetStatus @default(PENDING)
   batchId      String?
-  uploadLinkId String?           @unique @db.Uuid
+  uploadLinkId String?           @db.Uuid
   uploadLink   UplinkUploadLink? @relation(fields: [uploadLinkId], references: [id], onDelete: SetNull)
   createdAt    DateTime          @default(now())
   updatedAt    DateTime          @updatedAt
 
   @@unique([bucketName, objectKey])
   @@index([batchId])
+  @@index([uploadLinkId])
 }
 
 model UplinkUploadLink {
-  id        String       @id @default(uuid()) @db.Uuid
+  id        String        @id @default(uuid()) @db.Uuid
   name      String
   tokenHash String
-  token     String       @unique
+  token     String        @unique
   expiresAt DateTime
   usedAt    DateTime?
-  createdAt DateTime     @default(now())
-  asset     UplinkAsset?
+  createdAt DateTime      @default(now())
+  asset     UplinkAsset[]
 }
 
 model User {

@@ -20,15 +20,17 @@ const defaultPublicName = (fileName: string) => {
 
 const useGuestUplinkUpload = (token: string) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [file, setFile] = useState<File | null>(null);
+  const [files, setFiles] = useState<File[]>([]);
   const [publicName, setPublicName] = useState("");
   const [uploadPhase, setUploadPhase] = useState("");
   const [uploadedUrl, setUploadedUrl] = useState<string | null>(null);
   const isUploading = uploadPhase.length > 0;
 
-  const handleFileSelect = (selectedFile: File | null) => {
-    setFile(selectedFile);
-    if (selectedFile) setPublicName(defaultPublicName(selectedFile.name));
+  const handleFileSelect = (selectedFiles: File[]) => {
+    setFiles(selectedFiles);
+    if (selectedFiles[0]) {
+      setPublicName(defaultPublicName(selectedFiles[0].name));
+    }
   };
 
   const handlePublicNameChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -38,58 +40,75 @@ const useGuestUplinkUpload = (token: string) => {
   const handleUpload = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (uploadedUrl) return;
-    if (!file) {
-      toast.error("Choose a file to upload");
+    if (files.length === 0) {
+      toast.error("Choose at least one file to upload");
       return;
     }
-    if (file.size > MAX_UPLINK_SINGLE_UPLOAD_BYTES) {
-      toast.error("This file exceeds the single-upload size limit");
+    const oversizedFile = files.find(
+      (file) => file.size > MAX_UPLINK_SINGLE_UPLOAD_BYTES,
+    );
+    if (oversizedFile) {
+      toast.error(`${oversizedFile.name} exceeds the single-upload size limit`);
       return;
     }
 
     try {
       setUploadPhase("Preparing upload…");
-      const contentType = file.type || "application/octet-stream";
       const reservation = await createGuestUplinkUploadUrl(token, {
         publicName,
-        originalName: file.name,
-        contentType,
-        size: file.size,
+        files: files.map((file) => ({
+          originalName: file.name,
+          contentType: file.type || "application/octet-stream",
+          size: file.size,
+        })),
       });
 
       if (reservation.status !== "success" || !reservation.data) {
         toast.error(reservation.message || "Could not prepare the upload");
         return;
       }
+      if (reservation.data.length !== files.length) {
+        throw new Error("The server returned an incomplete set of upload URLs");
+      }
 
-      setUploadPhase("Uploading to storage…");
-      const response = await fetch(reservation.data.uploadUrl, {
-        method: "PUT",
-        headers: {
-          "Content-Type": contentType,
-          "If-None-Match": "*",
-        },
-        body: file,
-      });
+      for (const [index, file] of files.entries()) {
+        const upload = reservation.data[index];
+        if (!upload) throw new Error("An upload URL is missing");
 
-      if (!response.ok && response.status !== 412) {
-        throw new Error("Upload failed (" + response.status + ")");
+        setUploadPhase(`Uploading file ${index + 1} of ${files.length}…`);
+        const contentType = file.type || "application/octet-stream";
+        const response = await fetch(upload.uploadUrl, {
+          method: "PUT",
+          headers: {
+            "Content-Type": contentType,
+            "If-None-Match": "*",
+          },
+          body: file,
+        });
+
+        if (!response.ok && response.status !== 412) {
+          throw new Error(`Upload failed for ${file.name} (${response.status})`);
+        }
       }
 
       setUploadPhase("Verifying upload…");
       const completed = await completeGuestUplinkUpload(
         token,
-        reservation.data.assetId,
+        reservation.data.map(({ assetId }) => assetId),
       );
-      if (completed.status !== "success" || !completed.data) {
+      if (
+        completed.status !== "success" ||
+        !completed.data ||
+        completed.data.length !== files.length
+      ) {
         toast.error(completed.message || "Could not verify the uploaded file");
         return;
       }
 
-      setUploadedUrl(completed.data.storageUrl);
-      setFile(null);
+      setUploadedUrl(completed.data[0]?.storageUrl ?? null);
+      setFiles([]);
       if (fileInputRef.current) fileInputRef.current.value = "";
-      toast.success("File uploaded");
+      toast.success(files.length === 1 ? "File uploaded" : "Files uploaded");
     } catch (error) {
       toast.error(
         error instanceof Error
@@ -102,7 +121,7 @@ const useGuestUplinkUpload = (token: string) => {
   };
 
   return {
-    file,
+    files,
     fileInputRef,
     handleFileSelect,
     handlePublicNameChange,

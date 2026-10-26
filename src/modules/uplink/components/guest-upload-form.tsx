@@ -19,7 +19,7 @@ type Props = {
 
 const GuestUplinkUploadForm = ({ linkName, siteUrl, token }: Props) => {
   const {
-    file,
+    files,
     fileInputRef,
     handleFileSelect,
     handlePublicNameChange,
@@ -52,7 +52,7 @@ const GuestUplinkUploadForm = ({ linkName, siteUrl, token }: Props) => {
             Upload complete
           </h1>
           <p className="mt-1 text-sm leading-6 text-muted-foreground">
-            Your file is available at this link.
+            Your upload is available at this link.
           </p>
         </header>
         <div className="flex flex-col gap-3 p-6 sm:flex-row">
@@ -84,7 +84,7 @@ const GuestUplinkUploadForm = ({ linkName, siteUrl, token }: Props) => {
           Uplink / Shared upload
         </p>
         <h1 className="mt-3 text-2xl font-semibold tracking-tight sm:text-3xl">
-          Upload a file
+          Upload files
         </h1>
         <p className="mt-1 text-sm leading-6 text-muted-foreground">
           Shared link: {linkName}
@@ -93,7 +93,7 @@ const GuestUplinkUploadForm = ({ linkName, siteUrl, token }: Props) => {
       <form onSubmit={handleUpload}>
         <div className="grid gap-8 p-6 lg:grid-cols-[minmax(0,1.2fr)_minmax(18rem,0.8fr)] lg:gap-10">
           <UploadFileField
-            file={file}
+            files={files}
             inputRef={fileInputRef}
             isDisabled={isUploading}
             onFileSelect={handleFileSelect}
@@ -106,7 +106,7 @@ const GuestUplinkUploadForm = ({ linkName, siteUrl, token }: Props) => {
           />
         </div>
         <UploadSubmit
-          file={file}
+          files={files}
           isUploading={isUploading}
           uploadPhase={uploadPhase}
         />

@@ -2,6 +2,7 @@
 
 import { HeadObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { nanoid } from "nanoid";
 import { extname } from "node:path";
 import { z } from "zod";
 
@@ -22,6 +23,7 @@ type CreateGuestUploadUrlData = {
 };
 
 type CompleteGuestUploadData = {
+  assetId: string;
   objectKey: string;
   storageUrl: string;
 };
@@ -51,7 +53,6 @@ const getAvailableUploadLink = async (value: unknown) => {
   if (link.expiresAt <= new Date()) {
     return { error: "This upload link has expired" } as const;
   }
-
   return { link } as const;
 };
 
@@ -64,10 +65,22 @@ const getObjectName = (publicName: string, originalName: string) => {
     : `${publicName}${safeExtension}`;
 };
 
+const getBatchPublicName = (
+  publicName: string,
+  batchId: string,
+  index: number,
+) => {
+  const suffix = `-${batchId}-${index + 1}`;
+  const prefix = publicName
+    .slice(0, 180 - suffix.length)
+    .replace(/[._-]+$/, "");
+  return `${prefix}${suffix}`;
+};
+
 export const createGuestUplinkUploadUrl = async (
   token: string,
   input: unknown,
-): Promise<ServerActionState<CreateGuestUploadUrlData>> => {
+): Promise<ServerActionState<CreateGuestUploadUrlData[]>> => {
   try {
     const available = await getAvailableUploadLink(token);
     if ("error" in available) return failed(available.error as never);
@@ -76,72 +89,64 @@ export const createGuestUplinkUploadUrl = async (
     const storage = getUplinkStorage();
     if (!storage) return failed("Uplink storage is not configured");
 
-    const byteSize = BigInt(request.size);
-    let asset = await prisma.uplinkAsset.findUnique({
+    const existingAsset = await prisma.uplinkAsset.findFirst({
       where: { uploadLinkId: available.link.id },
-      select: {
-        id: true,
-        publicName: true,
-        bucketName: true,
-        objectKey: true,
-        originalName: true,
-        contentType: true,
-        size: true,
-        status: true,
-      },
+      select: { id: true },
     });
-
-    if (asset?.status === "READY") {
+    if (existingAsset) {
       return failed("This upload link has already been used");
     }
 
-    if (
-      asset &&
-      (asset.publicName !== request.publicName ||
-        asset.originalName !== request.originalName ||
-        asset.contentType !== request.contentType ||
-        asset.size !== byteSize)
-    ) {
-      return failed(
-        "A pending upload uses this link. Retry with the same file or ask for a new link",
-      );
-    }
+    const batchId = request.files.length > 1 ? nanoid() : null;
+    const uploadDetails = request.files.map((file, index) => {
+      const publicName =
+        batchId && index > 0
+          ? getBatchPublicName(request.publicName, batchId, index)
+          : request.publicName;
+      const objectName = getObjectName(publicName, file.originalName);
 
-    if (!asset) {
-      const nameInUse = await prisma.uplinkAsset.findUnique({
-        where: { publicName: request.publicName },
-        select: { id: true },
-      });
-      if (nameInUse) return failed("A file with this link name already exists");
+      return {
+        file,
+        publicName,
+        byteSize: BigInt(file.size),
+        objectKey: getUplinkObjectKey(objectName),
+      };
+    });
 
-      asset = await prisma.uplinkAsset.create({
-        data: {
-          publicName: request.publicName,
-          bucketName: storage.bucketName,
-          objectKey: getUplinkObjectKey(
-            getObjectName(request.publicName, request.originalName),
-          ),
-          originalName: request.originalName,
-          contentType: request.contentType,
-          size: byteSize,
-          uploadLinkId: available.link.id,
-          status: "PENDING",
-        },
-        select: {
-          id: true,
-          publicName: true,
-          bucketName: true,
-          objectKey: true,
-          originalName: true,
-          contentType: true,
-          size: true,
-          status: true,
-        },
-      });
-    }
+    const nameInUse = await prisma.uplinkAsset.findUnique({
+      where: { publicName: request.publicName },
+      select: { id: true },
+    });
+    if (nameInUse) return failed("A file with this link name already exists");
 
-    const storageUrl = getUplinkPublicUrl(asset.objectKey);
-    if (!storageUrl) return failed("Uplink storage is not configured");
+    const assets = await prisma.$transaction(
+      uploadDetails.map((detail) =>
+        prisma.uplinkAsset.create({
+          data: {
+            publicName: detail.publicName,
+            bucketName: storage.bucketName,
+            objectKey: detail.objectKey,
+            originalName: detail.file.originalName,
+            contentType: detail.file.contentType,
+            size: detail.byteSize,
+            batchId,
+            uploadLinkId: available.link.id,
+            status: "PENDING",
+          },
+          select: {
+            id: true,
+            batchId: true,
+            publicName: true,
+            bucketName: true,
+            objectKey: true,
+            originalName: true,
+            contentType: true,
+            size: true,
+            status: true,
+          },
+        }),
+      ),
+    );
 
     const expiresIn = Math.min(
       900,
@@ -149,27 +154,33 @@ export const createGuestUplinkUploadUrl = async (
     );
     if (expiresIn <= 0) return failed("This upload link has expired");
 
-    const uploadUrl = await getSignedUrl(
-      storage.client,
-      new PutObjectCommand({
-        Bucket: asset.bucketName,
-        Key: asset.objectKey,
-        ContentType: request.contentType,
-        IfNoneMatch: "*",
-      }),
-      { expiresIn },
-    );
+    const uploads: CreateGuestUploadUrlData[] = [];
+    for (const asset of assets) {
+      const storageUrl = getUplinkPublicUrl(asset.objectKey);
+      if (!storageUrl) return failed("Uplink storage is not configured");
 
-    return {
-      status: "success",
-      message: "Upload URL created",
-      data: {
+      const uploadUrl = await getSignedUrl(
+        storage.client,
+        new PutObjectCommand({
+          Bucket: asset.bucketName,
+          Key: asset.objectKey,
+          ContentType: asset.contentType,
+          IfNoneMatch: "*",
+        }),
+        { expiresIn },
+      );
+      uploads.push({
         assetId: asset.id,
         uploadUrl,
         objectKey: asset.objectKey,
         storageUrl,
         expiresIn,
-      },
+      });
+    }
+    return {
+      status: "success",
+      message: "Upload URLs created",
+      data: uploads,
       errors: null,
     };
   } catch (error) {
@@ -179,41 +190,84 @@ export const createGuestUplinkUploadUrl = async (
 
 export const completeGuestUplinkUpload = async (
   token: string,
-  assetId: string,
-): Promise<ServerActionState<CompleteGuestUploadData>> => {
+  assetIds: string[],
+): Promise<ServerActionState<CompleteGuestUploadData[]>> => {
   try {
     const available = await getAvailableUploadLink(token);
     if ("error" in available) return failed(available.error as never);
 
-    const id = idSchema.parse(assetId);
-    const asset = await prisma.uplinkAsset.findFirst({
-      where: { id, uploadLinkId: available.link.id, status: "PENDING" },
+    const ids = idSchema.array().min(1).max(100).parse(assetIds);
+    if (new Set(ids).size !== ids.length) {
+      return failed("Duplicate upload IDs");
+    }
+
+    const foundAssets = await prisma.uplinkAsset.findMany({
+      where: { id: { in: ids }, uploadLinkId: available.link.id },
       select: {
         id: true,
+        batchId: true,
         bucketName: true,
         objectKey: true,
         contentType: true,
         size: true,
+        status: true,
       },
     });
-    if (!asset) return failed("Upload record was not found for this link");
+    if (foundAssets.length !== ids.length) {
+      return failed("One or more upload records were not found for this link");
+    }
+
+    const foundAssetsById = new Map(
+      foundAssets.map((asset) => [asset.id, asset]),
+    );
+    const assets = ids.map((id) => foundAssetsById.get(id)!);
+    const batchId = assets[0]?.batchId ?? null;
+    if (assets.some((asset) => asset.batchId !== batchId)) {
+      return failed("All files must belong to the same upload batch");
+    }
+    if (batchId) {
+      const batchSize = await prisma.uplinkAsset.count({
+        where: { batchId, uploadLinkId: available.link.id },
+      });
+      if (batchSize !== ids.length) {
+        return failed("Complete all files in the batch together");
+      }
+    } else if (ids.length > 1) {
+      return failed("These files do not belong to a batch");
+    }
+    if (assets.some((asset) => asset.status !== "PENDING")) {
+      return failed("This upload batch has already been completed");
+    }
 
     const storage = getUplinkStorage();
     if (!storage) return failed("Uplink storage is not configured");
 
-    const head = await storage.client.send(
-      new HeadObjectCommand({ Bucket: asset.bucketName, Key: asset.objectKey }),
-    );
-    if (
-      head.ContentLength === undefined ||
-      BigInt(head.ContentLength) !== asset.size ||
-      head.ContentType !== asset.contentType
-    ) {
-      return failed("Uploaded file metadata did not match the upload request");
-    }
+    const completedUploads: CompleteGuestUploadData[] = [];
+    for (const asset of assets) {
+      const head = await storage.client.send(
+        new HeadObjectCommand({
+          Bucket: asset.bucketName,
+          Key: asset.objectKey,
+        }),
+      );
+      if (
+        head.ContentLength === undefined ||
+        BigInt(head.ContentLength) !== asset.size ||
+        head.ContentType !== asset.contentType
+      ) {
+        return failed(
+          "Uploaded file metadata did not match the upload request",
+        );
+      }
 
-    const storageUrl = getUplinkPublicUrl(asset.objectKey);
-    if (!storageUrl) return failed("Uplink storage is not configured");
+      const storageUrl = getUplinkPublicUrl(asset.objectKey);
+      if (!storageUrl) return failed("Uplink storage is not configured");
+      completedUploads.push({
+        assetId: asset.id,
+        objectKey: asset.objectKey,
+        storageUrl,
+      });
+    }
 
     const usedAt = new Date();
     const completed = await prisma.$transaction(async (tx) => {
@@ -227,27 +281,29 @@ export const completeGuestUplinkUpload = async (
       });
       if (consumedLink.count !== 1) return false;
 
-      const readyAsset = await tx.uplinkAsset.updateMany({
+      const readyAssets = await tx.uplinkAsset.updateMany({
         where: {
-          id: asset.id,
+          id: { in: ids },
           uploadLinkId: available.link.id,
           status: "PENDING",
         },
         data: { status: "READY" },
       });
-      if (readyAsset.count !== 1) throw new Error("Guest upload state changed");
+      if (readyAssets.count !== ids.length) {
+        throw new Error("Guest upload batch changed before completion");
+      }
 
       return true;
     });
 
     if (!completed) {
-      return failed("This upload link has already been used or has expired");
+      return failed("This upload link has already been used");
     }
 
     return {
       status: "success",
-      message: "Upload complete",
-      data: { objectKey: asset.objectKey, storageUrl },
+      message: "Uploads complete",
+      data: completedUploads,
       errors: null,
     };
   } catch (error) {
