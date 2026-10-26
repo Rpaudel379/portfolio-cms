@@ -16,28 +16,39 @@ export const uplinkPublicNameSchema = z
 
 export const uplinkUploadRequestSchema = z.object({
   publicName: uplinkPublicNameSchema,
-  originalName: z.string().trim().min(1).max(255),
-  contentType: z
-    .string()
-    .trim()
-    .min(1)
-    .max(255)
-    .regex(/^[A-Za-z0-9!#$&^_.+-]+\/[A-Za-z0-9!#$&^_.+-]+$/),
-  size: z
-    .number()
-    .int()
-    .min(0)
-    .max(
-      MAX_UPLINK_SINGLE_UPLOAD_BYTES,
-      "File exceeds the single-upload limit",
-    ),
+  files: z
+    .array(
+      z.object({
+        originalName: z.string().trim().min(1).max(255),
+        contentType: z
+          .string()
+          .trim()
+          .min(1)
+          .max(255)
+          .regex(/^[A-Za-z0-9!#$&^_.+-]+\/[A-Za-z0-9!#$&^_.+-]+$/),
+        size: z
+          .number()
+          .int()
+          .min(0)
+          .max(
+            MAX_UPLINK_SINGLE_UPLOAD_BYTES,
+            "File exceeds the single-upload limit",
+          ),
+      }),
+    )
+    .min(1, "Upload atleast one file")
+    .max(100, "Upload upto 100 files"),
 });
 
 export type UplinkUploadRequest = z.infer<typeof uplinkUploadRequestSchema>;
 
 export const uplinkUploadLinkRequestSchema = z.object({
   name: z.string().trim().min(1, "Link name is required").max(100),
-  expiresInMinutes: z.number().int().min(5).max(5 * 24 * 60),
+  expiresInMinutes: z
+    .number()
+    .int()
+    .min(5)
+    .max(5 * 24 * 60),
 });
 
 export type UplinkUploadLinkRequest = z.infer<

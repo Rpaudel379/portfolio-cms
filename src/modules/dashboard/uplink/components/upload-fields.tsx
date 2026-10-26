@@ -8,29 +8,30 @@ import type { ChangeEventHandler, RefObject } from "react";
 import { FileDropzone } from "./file-dropzone";
 
 type UploadFileFieldProps = {
-  file: File | null;
+  files: File[];
   inputRef: RefObject<HTMLInputElement | null>;
   isDisabled: boolean;
-  onFileSelect: (file: File | null) => void;
+  onFileSelect: (files: File[]) => void;
 };
 
 const UploadFileField = ({
-  file,
+  files,
   inputRef,
   isDisabled,
   onFileSelect,
 }: UploadFileFieldProps) => (
   <div className="space-y-3">
-    <Label htmlFor="uplink-file">File</Label>
+    <Label htmlFor="uplink-file">Files</Label>
     <FileDropzone
-      file={file}
+      files={files}
       inputRef={inputRef}
       isDisabled={isDisabled}
       onFileSelect={onFileSelect}
     />
     <p id="uplink-file-help" className="text-xs text-muted-foreground">
-      One file, up to{" "}
-      {(MAX_UPLINK_SINGLE_UPLOAD_BYTES / 1024 ** 3).toFixed(3)} GiB.
+      Each file can be up to{" "}
+      {(MAX_UPLINK_SINGLE_UPLOAD_BYTES / 1024 ** 3).toFixed(3)} GiB. Selected
+      files upload together as one batch.
     </p>
   </div>
 );
@@ -48,9 +49,7 @@ const PublicNameField = ({
   isDisabled,
   onChange,
 }: PublicNameFieldProps) => {
-  const linkName = publicName
-    ? encodeURIComponent(publicName)
-    : "your-file";
+  const linkName = publicName ? encodeURIComponent(publicName) : "your-file";
   const linkNameClassName = publicName
     ? "text-foreground"
     : "text-muted-foreground";
@@ -60,7 +59,7 @@ const PublicNameField = ({
       <div className="space-y-2">
         <Label htmlFor="uplink-public-name">Public link name</Label>
         <p className="text-sm leading-5 text-muted-foreground">
-          Choose the name that appears after /uplink/ in your file’s public URL.
+          Choose the base name for the upload.
         </p>
       </div>
       <Input
@@ -94,17 +93,21 @@ const PublicNameField = ({
 };
 
 type UploadSubmitProps = {
-  file: File | null;
+  files: File[];
   isUploading: boolean;
   uploadPhase: string;
 };
 
 const UploadSubmit = ({
-  file,
+  files,
   isUploading,
   uploadPhase,
 }: UploadSubmitProps) => {
-  const uploadLabel = isUploading ? "Uploading…" : "Upload file";
+  const uploadLabel = isUploading
+    ? "Uploading…"
+    : files.length > 1
+      ? "Upload files"
+      : "Upload file";
   const uploadIcon = isUploading ? (
     <LoaderCircle className="animate-spin" />
   ) : (
@@ -113,7 +116,7 @@ const UploadSubmit = ({
 
   return (
     <div className="flex flex-wrap items-center gap-3 border-t px-6 py-4">
-      <Button type="submit" disabled={!file || isUploading}>
+      <Button type="submit" disabled={files.length === 0 || isUploading}>
         {uploadIcon}
         {uploadLabel}
       </Button>

@@ -4,6 +4,7 @@ export type UploadAssetDTO = {
   originalName: string;
   contentType: string;
   sizeBytes: string;
+  batchId: string | null;
   storageUrl: string;
   status: "PENDING" | "READY";
   source: "SHARED" | "DASHBOARD";

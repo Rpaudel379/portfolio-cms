@@ -24,14 +24,16 @@ const defaultPublicName = (fileName: string) => {
 const useUplinkUpload = () => {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [file, setFile] = useState<File | null>(null);
+  const [files, setFiles] = useState<File[]>([]);
   const [publicName, setPublicName] = useState("");
   const [uploadPhase, setUploadPhase] = useState("");
   const isUploading = uploadPhase.length > 0;
 
-  const handleFileSelect = (selectedFile: File | null) => {
-    setFile(selectedFile);
-    if (selectedFile) setPublicName(defaultPublicName(selectedFile.name));
+  const handleFileSelect = (selectedFiles: File[]) => {
+    setFiles(selectedFiles);
+    if (selectedFiles[0]) {
+      setPublicName(defaultPublicName(selectedFiles[0].name));
+    }
   };
 
   const handlePublicNameChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -40,23 +42,27 @@ const useUplinkUpload = () => {
 
   const handleUpload = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!file) {
-      toast.error("Choose a file to upload");
+    if (files.length === 0) {
+      toast.error("Choose at least one file to upload");
       return;
     }
-    if (file.size > MAX_UPLINK_SINGLE_UPLOAD_BYTES) {
-      toast.error("This file exceeds the single-upload size limit");
+    const oversizedFile = files.find(
+      (file) => file.size > MAX_UPLINK_SINGLE_UPLOAD_BYTES,
+    );
+    if (oversizedFile) {
+      toast.error(`${oversizedFile.name} exceeds the single-upload size limit`);
       return;
     }
 
     try {
       setUploadPhase("Preparing upload…");
-      const contentType = file.type || "application/octet-stream";
       const reservation = await createUplinkUploadUrl({
         publicName,
-        originalName: file.name,
-        contentType,
-        size: file.size,
+        files: files.map((file) => ({
+          originalName: file.name,
+          contentType: file.type || "application/octet-stream",
+          size: file.size,
+        })),
       });
 
       if (reservation.status !== "success" || !reservation.data) {
@@ -64,26 +70,44 @@ const useUplinkUpload = () => {
         return;
       }
 
-      setUploadPhase("Uploading to R2…");
-      const uploadResponse = await fetch(reservation.data.uploadUrl, {
-        method: "PUT",
-        headers: { "Content-Type": contentType },
-        body: file,
-      });
-
-      if (!uploadResponse.ok) {
-        throw new Error("R2 upload failed (" + uploadResponse.status + ")");
+      if (reservation.data.length !== files.length) {
+        throw new Error("The server returned an incomplete set of upload URLs");
       }
 
-      setUploadPhase("Verifying upload…");
-      const completed = await completeUplinkUpload(reservation.data.assetId);
+      for (const [index, file] of files.entries()) {
+        const upload = reservation.data[index];
+        if (!upload) throw new Error("An upload URL is missing");
+
+        setUploadPhase(`Uploading file ${index + 1} of ${files.length}…`);
+        const contentType = file.type || "application/octet-stream";
+        const uploadResponse = await fetch(upload.uploadUrl, {
+          method: "PUT",
+          headers: { "Content-Type": contentType },
+          body: file,
+        });
+
+        if (!uploadResponse.ok) {
+          throw new Error(
+            `R2 upload failed for ${file.name} (${uploadResponse.status})`,
+          );
+        }
+      }
+
+      setUploadPhase("Verifying uploads…");
+      const completed = await completeUplinkUpload(
+        reservation.data.map(({ assetId }) => assetId),
+      );
       if (completed.status !== "success") {
         toast.error(completed.message || "Could not verify the uploaded file");
         return;
       }
 
-      toast.success("File added to Uplink");
-      setFile(null);
+      toast.success(
+        files.length === 1
+          ? "File added to Uplink"
+          : `${files.length} files added to Uplink`,
+      );
+      setFiles([]);
       setPublicName("");
       if (fileInputRef.current) fileInputRef.current.value = "";
       router.refresh();
@@ -99,7 +123,7 @@ const useUplinkUpload = () => {
   };
 
   return {
-    file,
+    files,
     fileInputRef,
     handleFileSelect,
     handlePublicNameChange,

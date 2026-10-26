@@ -13,7 +13,7 @@ type Props = {
 
 const UplinkUploadForm = ({ siteUrl }: Props) => {
   const {
-    file,
+    files,
     fileInputRef,
     handleFileSelect,
     handlePublicNameChange,
@@ -26,16 +26,15 @@ const UplinkUploadForm = ({ siteUrl }: Props) => {
   return (
     <section className="overflow-hidden rounded-xl border bg-card">
       <header className="border-b px-6 py-5">
-        <h2 className="text-lg font-semibold tracking-tight">Add a file</h2>
+        <h2 className="text-lg font-semibold tracking-tight">Add files</h2>
         <p className="mt-1 max-w-2xl text-sm leading-6 text-muted-foreground">
-          Upload directly from your browser to R2, then give the file a public
-          portfolio address.
+          Upload files directly to R2 and give them public addresses.
         </p>
       </header>
       <form onSubmit={handleUpload}>
         <div className="grid gap-8 p-6 lg:grid-cols-[minmax(0,1.2fr)_minmax(18rem,0.8fr)] lg:gap-10">
           <UploadFileField
-            file={file}
+            files={files}
             inputRef={fileInputRef}
             isDisabled={isUploading}
             onFileSelect={handleFileSelect}
@@ -48,7 +47,7 @@ const UplinkUploadForm = ({ siteUrl }: Props) => {
           />
         </div>
         <UploadSubmit
-          file={file}
+          files={files}
           isUploading={isUploading}
           uploadPhase={uploadPhase}
         />

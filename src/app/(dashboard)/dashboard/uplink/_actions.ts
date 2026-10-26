@@ -10,13 +10,14 @@ import { createHash, randomBytes } from "node:crypto";
 import { extname } from "node:path";
 import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
+import { nanoid } from "nanoid";
 
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { siteConfig } from "@/lib/site";
 import { getUplinkObjectKey, getUplinkPublicUrl } from "@/lib/uplink/config";
 import { getUplinkStorage } from "@/lib/uplink/r2-client";
-import { idSchema } from "@/schema/common.schema";
+import { idSchema, nanoidSchema } from "@/schema/common.schema";
 import {
   uplinkUploadLinkRequestSchema,
   uplinkUploadRequestSchema,
@@ -33,6 +34,7 @@ type CreateUploadUrlData = {
 };
 
 type CompleteUploadData = {
+  assetId: string;
   objectKey: string;
   storageUrl: string;
 };
@@ -64,6 +66,24 @@ const getObjectName = (publicName: string, originalName: string) => {
   }
 
   return `${publicName}${safeExtension}`;
+};
+
+const getBatchPublicName = (
+  publicName: string,
+  batchId: string,
+  index: number,
+) => {
+  const suffix = `-${batchId}-${index + 1}`;
+  const prefix = publicName
+    .slice(0, 180 - suffix.length)
+    .replace(/[._-]+$/, "");
+  return `${prefix}${suffix}`;
+};
+
+const getBatchObjectName = (objectName: string, batchId: string) => {
+  const extension = extname(objectName);
+  const stem = extension ? objectName.slice(0, -extension.length) : objectName;
+  return `${stem}-${batchId}${extension}`;
 };
 
 // Guest upload url
@@ -143,80 +163,95 @@ export const deleteUplinkUploadLink = async (
 
 export const createUplinkUploadUrl = async (
   input: unknown,
-): Promise<ServerActionState<CreateUploadUrlData>> => {
+): Promise<ServerActionState<CreateUploadUrlData[]>> => {
   try {
     if (!(await hasAuthenticatedSession())) {
       return failed("Sign in to upload files");
     }
 
     const request = uplinkUploadRequestSchema.parse(input);
+
+    const batchId = request.files.length > 1 ? nanoid() : null;
     const storage = getUplinkStorage();
     if (!storage) {
       return failed("Uplink storage is not configured");
     }
 
-    const byteSize = BigInt(request.size);
-    const existingAsset = await prisma.uplinkAsset.findUnique({
-      where: { publicName: request.publicName },
+    const uploadDetails = request.files.map((file, index) => {
+      const publicName =
+        batchId && index > 0
+          ? getBatchPublicName(request.publicName, batchId, index)
+          : request.publicName;
+      const objectName = getObjectName(publicName, file.originalName);
+
+      return {
+        file,
+        publicName,
+        byteSize: BigInt(file.size),
+        objectKey: getUplinkObjectKey(
+          batchId ? getBatchObjectName(objectName, batchId) : objectName,
+        ),
+      };
     });
 
-    // Reuse matching pending records so an interrupted upload can retry with a fresh URL and the same object key.
-    if (existingAsset?.status === "READY") {
-      return failed("A file with this link name already exists");
+    const existingAsset = await prisma.uplinkAsset.findFirst({
+      where: { publicName: request.publicName },
+      select: { id: true },
+    });
+    if (existingAsset) {
+      return failed("A file with this public name already exists");
     }
 
-    // Keep a pending link name tied to its original upload details; otherwise require a new name.
-    if (
-      existingAsset &&
-      (existingAsset.originalName !== request.originalName ||
-        existingAsset.contentType !== request.contentType ||
-        existingAsset.size !== byteSize)
-    ) {
-      return failed(
-        "A pending upload uses this link name. Retry it with the same file or choose another name",
-      );
-    }
-
-    const objectName = getObjectName(request.publicName, request.originalName);
-    const objectKey =
-      existingAsset?.objectKey ?? getUplinkObjectKey(objectName);
-    const bucketName = existingAsset?.bucketName ?? storage.bucketName;
-    const expiresIn = 900; // 15 minutes
-
-    const uploadUrl = await getSignedUrl(
-      storage.client,
-      new PutObjectCommand({
-        Bucket: bucketName,
-        Key: objectKey,
-        ContentType: request.contentType,
-      }),
-      { expiresIn },
+    const assets = await prisma.$transaction(
+      uploadDetails.map((uploadDetail) =>
+        prisma.uplinkAsset.create({
+          data: {
+            publicName: uploadDetail.publicName,
+            bucketName: storage.bucketName,
+            objectKey: uploadDetail.objectKey,
+            originalName: uploadDetail.file.originalName,
+            contentType: uploadDetail.file.contentType,
+            size: uploadDetail.byteSize,
+            batchId,
+            status: "PENDING",
+          },
+          select: {
+            id: true,
+            bucketName: true,
+            objectKey: true,
+            contentType: true,
+          },
+        }),
+      ),
     );
 
-    const asset =
-      existingAsset ??
-      (await prisma.uplinkAsset.create({
-        data: {
-          publicName: request.publicName,
-          bucketName: storage.bucketName,
-          objectKey,
-          originalName: request.originalName,
-          contentType: request.contentType,
-          size: byteSize,
-          status: "PENDING",
-        },
-        select: { id: true },
-      }));
-
-    const storageUrl = getUplinkPublicUrl(objectKey);
-    if (!storageUrl) {
-      return failed("Uplink storage is not configured");
+    const expiresIn = 900; // 15 minutes
+    const uploads: CreateUploadUrlData[] = [];
+    for (const asset of assets) {
+      const storageUrl = getUplinkPublicUrl(asset.objectKey);
+      if (!storageUrl) return failed("Uplink storage is not configured");
+      const uploadUrl = await getSignedUrl(
+        storage.client,
+        new PutObjectCommand({
+          Bucket: asset.bucketName,
+          Key: asset.objectKey,
+          ContentType: asset.contentType,
+        }),
+        { expiresIn },
+      );
+      uploads.push({
+        assetId: asset.id,
+        uploadUrl,
+        objectKey: asset.objectKey,
+        storageUrl,
+        expiresIn,
+      });
     }
 
     return {
       status: "success",
-      message: "Upload URL created",
-      data: { assetId: asset.id, uploadUrl, objectKey, storageUrl, expiresIn },
+      message: "Upload URLs created",
+      data: uploads,
       errors: null,
     };
   } catch (error) {
@@ -225,17 +260,49 @@ export const createUplinkUploadUrl = async (
 };
 
 export const completeUplinkUpload = async (
-  assetId: string,
-): Promise<ServerActionState<CompleteUploadData>> => {
+  assetIds: string[],
+): Promise<ServerActionState<CompleteUploadData[]>> => {
   try {
     if (!(await hasAuthenticatedSession())) {
       return failed("Sign in to complete uploads");
     }
 
-    const id = idSchema.parse(assetId);
-    const asset = await prisma.uplinkAsset.findUnique({ where: { id } });
-    if (!asset) {
-      return failed("Upload record was not found");
+    const ids = idSchema.array().min(1).parse(assetIds);
+    if (new Set(ids).size !== ids.length) {
+      return failed("Duplicate upload IDs");
+    }
+
+    const foundAssets = await prisma.uplinkAsset.findMany({
+      where: { id: { in: ids } },
+      select: {
+        id: true,
+        batchId: true,
+        bucketName: true,
+        objectKey: true,
+        contentType: true,
+        size: true,
+        status: true,
+      },
+    });
+    if (foundAssets.length !== ids.length) {
+      return failed("One or more upload records were not found");
+    }
+
+    const foundAssetsById = new Map(
+      foundAssets.map((asset) => [asset.id, asset]),
+    );
+    const assets = ids.map((id) => foundAssetsById.get(id)!);
+    const batchId = assets[0]?.batchId;
+    if (assets.some((asset) => asset.batchId !== batchId)) {
+      return failed("All files must belong to the same upload batch");
+    }
+    if (batchId) {
+      const batchSize = await prisma.uplinkAsset.count({ where: { batchId } });
+      if (batchSize !== ids.length) {
+        return failed("Complete all files in the batch together");
+      }
+    } else if (ids.length > 1) {
+      return failed("These files do not belong to a batch");
     }
 
     const storage = getUplinkStorage();
@@ -243,51 +310,64 @@ export const completeUplinkUpload = async (
       return failed("Uplink storage is not configured");
     }
 
-    if (asset.status === "READY") {
+    const completedUploads: CompleteUploadData[] = [];
+    for (const asset of assets) {
       const storageUrl = getUplinkPublicUrl(asset.objectKey);
-      if (!storageUrl) {
-        return failed("Uplink storage is not configured");
-      }
+      if (!storageUrl) return failed("Uplink storage is not configured");
+      completedUploads.push({
+        assetId: asset.id,
+        objectKey: asset.objectKey,
+        storageUrl,
+      });
+    }
 
+    const readyCount = assets.filter(
+      (asset) => asset.status === "READY",
+    ).length;
+    if (readyCount === assets.length) {
       return {
         status: "success",
-        message: "Upload is already complete",
-        data: { objectKey: asset.objectKey, storageUrl },
+        message: "Uploads are already complete",
+        data: completedUploads,
         errors: null,
       };
     }
-
-    const head = await storage.client.send(
-      new HeadObjectCommand({
-        Bucket: asset.bucketName,
-        Key: asset.objectKey,
-      }),
-    );
-
-    if (
-      head.ContentLength === undefined ||
-      BigInt(head.ContentLength) !== asset.size ||
-      head.ContentType !== asset.contentType
-    ) {
-      return failed("Uploaded file metadata did not match the upload request");
+    if (readyCount > 0) {
+      return failed("The upload batch is partially complete");
     }
 
-    await prisma.uplinkAsset.update({
-      where: { id },
+    for (const asset of assets) {
+      const head = await storage.client.send(
+        new HeadObjectCommand({
+          Bucket: asset.bucketName,
+          Key: asset.objectKey,
+        }),
+      );
+      if (
+        head.ContentLength === undefined ||
+        BigInt(head.ContentLength) !== asset.size ||
+        head.ContentType !== asset.contentType
+      ) {
+        return failed(
+          "Uploaded file metadata did not match the upload request",
+        );
+      }
+    }
+
+    const updated = await prisma.uplinkAsset.updateMany({
+      where: { id: { in: ids } },
       data: { status: "READY" },
     });
+    if (updated.count !== ids.length) {
+      return failed("One or more upload records were not found");
+    }
 
     revalidatePath("/dashboard/uplink");
 
-    const storageUrl = getUplinkPublicUrl(asset.objectKey);
-    if (!storageUrl) {
-      return failed("Uplink storage is not configured");
-    }
-
     return {
       status: "success",
-      message: "Upload complete",
-      data: { objectKey: asset.objectKey, storageUrl },
+      message: "Uploads complete",
+      data: completedUploads,
       errors: null,
     };
   } catch (error) {
@@ -333,6 +413,59 @@ export const deleteUplinkAsset = async (
     return {
       status: "success",
       message: "Uplink file deleted",
+      data: null,
+      errors: null,
+    };
+  } catch (error) {
+    return handleErrorResponse(error);
+  }
+};
+
+export const deleteUplinkBatch = async (
+  batchId: string,
+): Promise<ServerActionState<null>> => {
+  try {
+    if (!(await hasAuthenticatedSession())) {
+      return failed("Sign in to delete upload batches");
+    }
+
+    const parsedBatchId = nanoidSchema.parse(batchId);
+    const storage = getUplinkStorage();
+    if (!storage) {
+      return failed("Uplink storage is not configured");
+    }
+
+    const assets = await prisma.uplinkAsset.findMany({
+      where: { batchId: parsedBatchId },
+      select: { bucketName: true, objectKey: true, publicName: true },
+    });
+    if (assets.length === 0) {
+      return failed("Upload batch was not found");
+    }
+
+    await Promise.all(
+      assets.map((asset) =>
+        storage.client.send(
+          new DeleteObjectCommand({
+            Bucket: asset.bucketName,
+            Key: asset.objectKey,
+          }),
+        ),
+      ),
+    );
+    await prisma.uplinkAsset.deleteMany({
+      where: { batchId: parsedBatchId },
+    });
+
+    revalidatePath("/dashboard/uplink");
+    const publicName =
+      assets.find((asset) => !asset.publicName.includes(parsedBatchId))
+        ?.publicName ?? assets[0]?.publicName;
+    revalidatePath(`/uplink/${encodeURIComponent(publicName)}`);
+
+    return {
+      status: "success",
+      message: "Upload batch deleted",
       data: null,
       errors: null,
     };

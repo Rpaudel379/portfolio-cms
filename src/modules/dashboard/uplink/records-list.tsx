@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/select";
 import { useState } from "react";
 
+import { DeleteBatchButton } from "./components/delete-batch-button";
 import { UplinkRecordsEmptyState } from "./components/records-empty-state";
 import { UplinkRecordCard } from "./components/record-card";
 import type { UploadAssetDTO } from "./types";
@@ -49,7 +50,9 @@ const UplinkRecordsList = ({ assets, siteUrl }: Props) => {
               ready
             </p>
             <p>
-              <span className="font-medium text-foreground">{pendingCount}</span>{" "}
+              <span className="font-medium text-foreground">
+                {pendingCount}
+              </span>{" "}
               pending
             </p>
           </div>
@@ -97,8 +100,7 @@ const UplinkRecordsContent = ({
 }: ContentProps) => {
   if (assets.length === 0) {
     if (hasAssets) {
-      const sourceLabel =
-        sourceFilter === "SHARED" ? "shared" : "dashboard";
+      const sourceLabel = sourceFilter === "SHARED" ? "shared" : "dashboard";
 
       return (
         <p className="border-b border-dashed border-border py-8 text-sm text-muted-foreground">
@@ -110,11 +112,67 @@ const UplinkRecordsContent = ({
     return <UplinkRecordsEmptyState />;
   }
 
+  const groups = Array.from(
+    Map.groupBy(assets, (asset) => asset.batchId ?? asset.id),
+    ([id, batchAssets]) => ({
+      id,
+      batchId: batchAssets[0]?.batchId ?? null,
+      assets: batchAssets,
+    }),
+  );
+
   return (
-    <div className="divide-y divide-border">
-      {assets.map((asset) => (
-        <UplinkRecordCard key={asset.id} asset={asset} siteUrl={siteUrl} />
-      ))}
+    <div className="space-y-3">
+      {groups.map(({ id, batchId, assets: batchAssets }) => {
+        if (!batchId) {
+          return (
+            <div key={id} className="border-b border-border">
+              {batchAssets.map((asset) => (
+                <UplinkRecordCard
+                  key={asset.id}
+                  asset={asset}
+                  siteUrl={siteUrl}
+                />
+              ))}
+            </div>
+          );
+        }
+
+        const publicName =
+          batchAssets.find((asset) => !asset.publicName.includes(batchId))
+            ?.publicName ?? batchAssets[0]?.publicName ?? "";
+
+        return (
+          <section
+            key={id}
+            className="overflow-hidden rounded-xl border border-border bg-muted/20"
+          >
+            <header className="flex items-center justify-between gap-3 border-b border-border px-4 py-3">
+              <div className="min-w-0">
+                <h3 className="break-all text-sm font-semibold">{publicName}</h3>
+                <p className="text-xs text-muted-foreground">
+                  {batchAssets.length}{" "}
+                  {batchAssets.length === 1 ? "file" : "files"}
+                </p>
+              </div>
+              <DeleteBatchButton
+                batchId={batchId}
+                publicName={publicName}
+                fileCount={batchAssets.length}
+              />
+            </header>
+            <div className="divide-y divide-border px-4">
+              {batchAssets.map((asset) => (
+                <UplinkRecordCard
+                  key={asset.id}
+                  asset={asset}
+                  siteUrl={siteUrl}
+                />
+              ))}
+            </div>
+          </section>
+        );
+      })}
     </div>
   );
 };
