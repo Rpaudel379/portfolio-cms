@@ -27,12 +27,25 @@ const STATUS_PRESENTATION = {
   },
 } as const;
 
+const SOURCE_PRESENTATION = {
+  SHARED: {
+    label: "Shared upload",
+    className:
+      "border-sky-600/30 bg-sky-600/10 text-sky-700 dark:text-sky-400",
+  },
+  DASHBOARD: {
+    label: "Dashboard upload",
+    className: "border-border bg-muted/40 text-muted-foreground",
+  },
+} as const;
+
 const UplinkRecordCard = ({ asset, siteUrl }: Props) => {
   const { copyLink, handleDelete, isDeleting } =
     useUplinkRecordActions(asset);
   const portfolioUrl =
     siteUrl + "/uplink/" + encodeURIComponent(asset.publicName);
   const status = STATUS_PRESENTATION[asset.status];
+  const source = SOURCE_PRESENTATION[asset.source];
 
   return (
     <article className="grid gap-5 py-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.35fr)_auto] lg:items-center">
@@ -67,9 +80,14 @@ const UplinkRecordCard = ({ asset, siteUrl }: Props) => {
       />
 
       <div className="flex items-center justify-between gap-3 lg:flex-col lg:items-end">
-        <Badge variant="outline" className={status.className}>
-          {status.label}
-        </Badge>
+        <div className="flex flex-wrap gap-2 lg:justify-end">
+          <Badge variant="outline" className={source.className}>
+            {source.label}
+          </Badge>
+          <Badge variant="outline" className={status.className}>
+            {status.label}
+          </Badge>
+        </div>
         <DeleteRecordButton
           publicName={asset.publicName}
           isDeleting={isDeleting}

@@ -6,16 +6,21 @@ import {
   PutObjectCommand,
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { createHash, randomBytes } from "node:crypto";
 import { extname } from "node:path";
 import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
 
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { siteConfig } from "@/lib/site";
 import { getUplinkObjectKey, getUplinkPublicUrl } from "@/lib/uplink/config";
 import { getUplinkStorage } from "@/lib/uplink/r2-client";
 import { idSchema } from "@/schema/common.schema";
-import { uplinkUploadRequestSchema } from "@/schema/uplink.schema";
+import {
+  uplinkUploadLinkRequestSchema,
+  uplinkUploadRequestSchema,
+} from "@/schema/uplink.schema";
 import type { ServerActionState } from "@/types/common.types";
 import { handleErrorResponse } from "@/utils/error-response";
 
@@ -30,6 +35,11 @@ type CreateUploadUrlData = {
 type CompleteUploadData = {
   objectKey: string;
   storageUrl: string;
+};
+
+type CreateUploadLinkData = {
+  url: string;
+  expiresAt: string;
 };
 
 const failed = <T>(message: string): ServerActionState<T> => ({
@@ -47,15 +57,88 @@ const hasAuthenticatedSession = async () => {
 // Adds the original file's safe extension to the object name unless it's already present.
 const getObjectName = (publicName: string, originalName: string) => {
   const extension = extname(originalName).toLowerCase();
-  const safeExtension = /^\.[a-z0-9]{1,20}$/.test(extension)
-    ? extension
-    : "";
+  const safeExtension = /^\.[a-z0-9]{1,20}$/.test(extension) ? extension : "";
 
   if (!safeExtension || publicName.toLowerCase().endsWith(safeExtension)) {
     return publicName;
   }
 
   return `${publicName}${safeExtension}`;
+};
+
+// Guest upload url
+export const createUplinkUploadLink = async (
+  input: unknown,
+): Promise<ServerActionState<CreateUploadLinkData>> => {
+  try {
+    if (!(await hasAuthenticatedSession())) {
+      return failed("Sign in to create upload links");
+    }
+
+    if (!getUplinkStorage()) {
+      return failed("Uplink storage is not configured");
+    }
+
+    const request = uplinkUploadLinkRequestSchema.parse(input);
+    const token = randomBytes(32).toString("base64url");
+    const tokenHash = createHash("sha256").update(token).digest("hex");
+    const createdAt = new Date();
+    const expiresAt = new Date(
+      createdAt.getTime() + request.expiresInMinutes * 60_000,
+    );
+    const link = await prisma.uplinkUploadLink.create({
+      data: {
+        name: request.name,
+        token,
+        tokenHash,
+        createdAt,
+        expiresAt,
+      },
+      select: { expiresAt: true },
+    });
+
+    revalidatePath("/dashboard/uplink");
+
+    return {
+      status: "success",
+      message: "Upload link created",
+      data: {
+        expiresAt: link.expiresAt.toISOString(),
+        url: siteConfig.url.replace(/\/+$/, "") + "/uplink/upload/" + token,
+      },
+      errors: null,
+    };
+  } catch (error) {
+    return handleErrorResponse(error);
+  }
+};
+
+export const deleteUplinkUploadLink = async (
+  linkId: string,
+): Promise<ServerActionState<null>> => {
+  try {
+    if (!(await hasAuthenticatedSession())) {
+      return failed("Sign in to delete upload links");
+    }
+
+    const id = idSchema.parse(linkId);
+    const result = await prisma.uplinkUploadLink.deleteMany({ where: { id } });
+
+    if (result.count === 0) {
+      return failed("Upload link not found");
+    }
+
+    revalidatePath("/dashboard/uplink");
+
+    return {
+      status: "success",
+      message: "Upload link deleted",
+      data: null,
+      errors: null,
+    };
+  } catch (error) {
+    return handleErrorResponse(error);
+  }
 };
 
 export const createUplinkUploadUrl = async (

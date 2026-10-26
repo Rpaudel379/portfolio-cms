@@ -60,7 +60,7 @@ const PublicNameField = ({
       <div className="space-y-2">
         <Label htmlFor="uplink-public-name">Public link name</Label>
         <p className="text-sm leading-5 text-muted-foreground">
-          Choose the last part of your portfolio URL.
+          Choose the name that appears after /uplink/ in your file’s public URL.
         </p>
       </div>
       <Input

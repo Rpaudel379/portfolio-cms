@@ -113,7 +113,7 @@ Replace the password placeholder in both Postgres URLs with your database passwo
 
 1. Create an R2 bucket and an API token with object read, write, and delete permission scoped to that bucket.
 2. Expose the bucket publicly using either a custom domain or Cloudflare's [Public Development URL](https://developers.cloudflare.com/r2/buckets/public-buckets/), which you enable in the bucket's Settings. Set `UPLINK_PUBLIC_BASE_URL` to the chosen public bucket URL. Use a custom domain for production; the development URL is intended for non-production use.
-3. Configure the bucket's CORS policy to allow `PUT` requests from the portfolio origin (`NEXT_PUBLIC_SITE_URL`) with the `Content-Type` header. This allows the browser to upload directly to R2. See Cloudflare's [CORS documentation](https://developers.cloudflare.com/r2/buckets/cors/) for the dashboard steps.
+3. Configure the bucket's CORS policy to allow `PUT` requests from the portfolio origin (`NEXT_PUBLIC_SITE_URL`) with the `Content-Type` and `If-None-Match` headers. This allows the browser to upload directly to R2. See Cloudflare's [CORS documentation](https://developers.cloudflare.com/r2/buckets/cors/) for the dashboard steps.
 4. Set all five R2 variables above. Leave them all unset to keep the optional Uplink feature disabled; a partial configuration is treated as an error.
 
 In the Cloudflare dashboard, open **R2 Object Storage → your bucket → Settings → CORS Policy → Add CORS policy → JSON** and paste a policy like this. Replace the production origin with the exact origin in `NEXT_PUBLIC_SITE_URL`; keep `localhost` if you upload during local development.
@@ -126,7 +126,7 @@ In the Cloudflare dashboard, open **R2 Object Storage → your bucket → Settin
       "http://localhost:3000"
     ],
     "AllowedMethods": ["PUT"],
-    "AllowedHeaders": ["Content-Type"],
+    "AllowedHeaders": ["Content-Type", "If-None-Match"],
     "MaxAgeSeconds": 3600
   }
 ]

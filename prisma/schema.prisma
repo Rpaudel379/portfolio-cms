@@ -91,18 +91,33 @@ enum UplinkAssetStatus {
 }
 
 model UplinkAsset {
-  id             String            @id @default(uuid()) @db.Uuid
-  publicName     String            @unique @db.VarChar(180)
-  bucketName     String
-  objectKey      String
-  originalName   String
-  contentType    String
-  size           BigInt
-  status         UplinkAssetStatus @default(PENDING)
-  createdAt      DateTime          @default(now())
-  updatedAt      DateTime          @updatedAt
+  id           String            @id @default(uuid()) @db.Uuid
+  publicName   String            @unique @db.VarChar(180)
+  bucketName   String
+  objectKey    String
+  originalName String
+  contentType  String
+  size         BigInt
+  status       UplinkAssetStatus @default(PENDING)
+  batchId      String?
+  uploadLinkId String?           @unique @db.Uuid
+  uploadLink   UplinkUploadLink? @relation(fields: [uploadLinkId], references: [id], onDelete: SetNull)
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
 
   @@unique([bucketName, objectKey])
+  @@index([batchId])
+}
+
+model UplinkUploadLink {
+  id        String       @id @default(uuid()) @db.Uuid
+  name      String
+  tokenHash String
+  token     String       @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime     @default(now())
+  asset     UplinkAsset?
 }
 
 model User {
@@ -120,8 +135,8 @@ model User {
   displayUsername String?
 
   @@unique([email])
-  @@map("user")
   @@unique([username])
+  @@map("user")
 }
 
 model Session {

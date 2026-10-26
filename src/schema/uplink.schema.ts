@@ -34,3 +34,12 @@ export const uplinkUploadRequestSchema = z.object({
 });
 
 export type UplinkUploadRequest = z.infer<typeof uplinkUploadRequestSchema>;
+
+export const uplinkUploadLinkRequestSchema = z.object({
+  name: z.string().trim().min(1, "Link name is required").max(100),
+  expiresInMinutes: z.number().int().min(5).max(5 * 24 * 60),
+});
+
+export type UplinkUploadLinkRequest = z.infer<
+  typeof uplinkUploadLinkRequestSchema
+>;

@@ -17,7 +17,22 @@ const UplinkPage = async () => {
           size: true,
           objectKey: true,
           status: true,
+          uploadLinkId: true,
           createdAt: true,
+        },
+      })
+    : [];
+
+  const linkRecords = isConfigured
+    ? await prisma.uplinkUploadLink.findMany({
+        orderBy: { createdAt: "desc" },
+        select: {
+          id: true,
+          name: true,
+          token: true,
+          createdAt: true,
+          expiresAt: true,
+          usedAt: true,
         },
       })
     : [];
@@ -36,13 +51,30 @@ const UplinkPage = async () => {
       sizeBytes: asset.size.toString(),
       storageUrl,
       status: asset.status,
+      source: asset.uploadLinkId ? ("SHARED" as const) : ("DASHBOARD" as const),
       createdAt: asset.createdAt.toISOString(),
     };
   });
 
+  const now = new Date();
+  const uploadLinks = linkRecords.map((link) => ({
+    id: link.id,
+    name: link.name,
+    url: `${siteConfig.url.replace(/\/+$/, "")}/uplink/upload/${link.token}`,
+    createdAt: link.createdAt.toISOString(),
+    expiresAt: link.expiresAt.toISOString(),
+    usedAt: link.usedAt?.toISOString() ?? null,
+    status: link.usedAt
+      ? ("USED" as const)
+      : link.expiresAt <= now
+        ? ("EXPIRED" as const)
+        : ("ACTIVE" as const),
+  }));
+
   return (
     <UplinkDashboard
       assets={assets}
+      uploadLinks={uploadLinks}
       isConfigured={isConfigured}
       siteUrl={siteConfig.url.replace(/\/+$/, "")}
     />
